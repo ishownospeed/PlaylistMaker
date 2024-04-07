@@ -11,9 +11,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:layout_marginStart="@dimen/medium_marginStart"
-        android:layout_marginTop="16dp"
-        android:paddingBottom="35dp"
+        android:layout_marginStart="@dimen/margin_16dp"
+        android:layout_marginTop="@dimen/margin_16dp"
+        android:paddingBottom="@dimen/paddingBottom_35dp"
         android:text="@string/app_name"
         android:textColor="@color/white"
         android:textSize="@dimen/primary_text_size"
@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:layout_marginHorizontal="16dp"
+        android:layout_marginHorizontal="@dimen/margin_16dp"
         android:layout_weight="1"
         android:backgroundTint="@color/white"
         android:foreground="?attr/selectableItemBackground"
@@ -33,10 +33,10 @@
         android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="@dimen/primary_text_size"
-        app:cornerRadius="16dp"
+        app:cornerRadius="@dimen/medium_cornerRadius"
         app:icon="@drawable/ic_search"
         app:iconGravity="textStart"
-        app:iconPadding="8dp"
+        app:iconPadding="@dimen/iconPadding_8dp"
         app:iconTint="@color/black" />
 
     <Button
@@ -44,8 +44,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginHorizontal="@dimen/margin_16dp"
+        android:layout_marginTop="@dimen/margin_6dp"
         android:layout_weight="1"
         android:backgroundTint="@color/white"
         android:foreground="?attr/selectableItemBackground"
@@ -54,10 +54,10 @@
         android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="@dimen/primary_text_size"
-        app:cornerRadius="16dp"
+        app:cornerRadius="@dimen/medium_cornerRadius"
         app:icon="@drawable/ic_media_library"
         app:iconGravity="textStart"
-        app:iconPadding="8dp"
+        app:iconPadding="@dimen/iconPadding_8dp"
         app:iconTint="@color/black" />
 
     <Button
@@ -65,9 +65,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginHorizontal="@dimen/margin_16dp"
+        android:layout_marginTop="@dimen/margin_6dp"
+        android:layout_marginBottom="@dimen/margin_28dp"
         android:layout_weight="1"
         android:backgroundTint="@color/white"
         android:foreground="?attr/selectableItemBackground"
@@ -76,9 +76,10 @@
         android:textAllCaps="false"
         android:textColor="@color/black"
         android:textSize="@dimen/primary_text_size"
-        app:cornerRadius="16dp"
+        app:cornerRadius="@dimen/medium_cornerRadius"
         app:icon="@drawable/ic_settings"
         app:iconGravity="textStart"
+        app:iconPadding="@dimen/iconPadding_8dp"
         app:iconTint="@color/black" />
 
 </LinearLayout>

@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="primary_text_size">22sp</dimen>
-    <dimen name="medium_marginStart">16dp</dimen>
+    <dimen name="medium_text_size">16sp</dimen>
+
+    <dimen name="margin_6dp">6dp</dimen>
+    <dimen name="margin_10dp">10dp</dimen>
+    <dimen name="margin_12dp">12dp</dimen>
+    <dimen name="margin_16dp">16dp</dimen>
+    <dimen name="margin_18dp">18dp</dimen>
+    <dimen name="margin_19dp">19dp</dimen>
+    <dimen name="margin_21dp">21dp</dimen>
+    <dimen name="margin_24dp">24dp</dimen>
+    <dimen name="margin_28dp">28dp</dimen>
+    <dimen name="margin_60dp">60dp</dimen>
+
+    <dimen name="medium_cornerRadius">16dp</dimen>
+
+    <dimen name="iconPadding_8dp">8dp</dimen>
+
+    <dimen name="paddingBottom_35dp">35dp</dimen>
+    <dimen name="small_padding">4dp</dimen>
+    <dimen name="primary_padding">10dp</dimen>
 </resources>
