@@ -3,8 +3,14 @@
     <string name="search">Поиск</string>
     <string name="media_library">Медиатека</string>
     <string name="settings">Настройки</string>
-    <string name="night_theme">Темная тема</string>
+    <string name="night_theme">Тёмная тема</string>
     <string name="share">Поделиться приложением</string>
     <string name="support">Написать в поддержку</string>
     <string name="terms_use">Пользовательское соглашение</string>
+    <string name="link_share">https://practicum.yandex.ru/android-developer/</string>
+    <string name="message_share">Поделиться с помощью</string>
+    <string name="mail_support">wastoyou@mail.ru</string>
+    <string name="subject_support">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
+    <string name="text_support">Спасибо разработчикам и разработчицам за крутое приложение!</string>
+    <string name="link_terms_use">https://yandex.ru/legal/practicum_offer/</string>
 </resources>
