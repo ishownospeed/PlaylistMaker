@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class SearchActivity : AppCompatActivity() {
 
-    private var inputValue: String = STRING_DEF
+    private var inputValue: String = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
@@ -66,7 +66,6 @@ class SearchActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val SAVE_STATE = "SAVE_STATE"
-        const val STRING_DEF = ""
+        private const val SAVE_STATE = "SAVE_STATE"
     }
 }

@@ -6,8 +6,6 @@
     </style>
 
     <style name="ColorSwitch">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
         <item name="thumbTint">@color/blue</item>
         <item name="trackTint">@color/light_blue</item>
         <item name="android:checked">true</item>
