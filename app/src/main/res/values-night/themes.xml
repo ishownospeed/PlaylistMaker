@@ -10,8 +10,8 @@
         <item name="colorSecondaryVariant">@color/white</item>
         <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/black</item>
         <!-- Customize your dark theme here. -->
-        <item name="colorPrimaryDark">@color/black</item>
     </style>
 
 </resources>
