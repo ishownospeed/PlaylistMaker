@@ -13,7 +13,7 @@
         android:id="@+id/trackImage"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        tools:src="@drawable/placeholder_barsik" />
+        tools:src="@drawable/ic_placeholder" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -33,7 +33,7 @@
             tools:text="Название трека" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
@@ -42,21 +42,19 @@
                 style="@style/SmallTextStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
                 tools:text="Исполнитель" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_dot"
-                app:tint="?attr/colorPrimaryVariant" />
 
             <TextView
                 android:id="@+id/trackTime"
                 style="@style/SmallTextStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="0"
+                app:drawableStartCompat="@drawable/ic_dot"
+                app:drawableTint="?attr/colorPrimaryVariant"
                 tools:text="Продолжительность" />
         </LinearLayout>
 
