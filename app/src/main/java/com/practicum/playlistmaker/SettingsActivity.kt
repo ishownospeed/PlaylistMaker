@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class SettingsActivity : AppCompatActivity() {
@@ -14,9 +15,9 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         val buttonArrowLeft = findViewById<ImageView>(R.id.arrow_left_settings)
-        val buttonShare = findViewById<ImageView>(R.id.share)
-        val buttonSupport = findViewById<ImageView>(R.id.support)
-        val buttonTermsUse = findViewById<ImageView>(R.id.terms_use)
+        val buttonShare = findViewById<TextView>(R.id.share)
+        val buttonSupport = findViewById<TextView>(R.id.support)
+        val buttonTermsUse = findViewById<TextView>(R.id.terms_use)
 
         buttonArrowLeft.setOnClickListener { finish() }
 
