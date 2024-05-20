@@ -31,8 +31,8 @@ class SearchActivity : AppCompatActivity() {
 
     private val trackService = retrofit.create(iTunesApi::class.java)
 
-    private val tracks = ArrayList<Track>()
-    private val adapter = TrackAdapter()
+    private val tracks = mutableListOf<Track>()
+    private val adapter = TrackAdapter(tracks)
 
     private lateinit var buttonArrowLeft: ImageView
     private lateinit var clearButton: ImageView
@@ -54,7 +54,6 @@ class SearchActivity : AppCompatActivity() {
         placeholderUploadFailed = findViewById(R.id.placeholderUploadFailed)
         buttonUpdate = findViewById(R.id.buttonUpdate)
 
-        adapter.tracks = tracks
         recycler.adapter = adapter
 
         buttonArrowLeft.setOnClickListener { finish() }
@@ -64,8 +63,10 @@ class SearchActivity : AppCompatActivity() {
             val inputMethodManager =
                 getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(inputEditText.windowToken, 0)
-            tracks.clear()
-            adapter.notifyDataSetChanged()
+            adapter.clearTracks()
+            placeholderNothingFound.visibility = View.GONE
+            placeholderUploadFailed.visibility = View.GONE
+            buttonUpdate.visibility = View.GONE
         }
 
         val textWatcher = object : TextWatcher {
@@ -102,11 +103,10 @@ class SearchActivity : AppCompatActivity() {
                     call: Call<TrackResponse>,
                     response: Response<TrackResponse>
                 ) {
-                    if (response.code() == 200) {
+                    if (response.code() == SUCCESS_OK) {
                         tracks.clear()
                         if (response.body()?.results?.isNotEmpty() == true) {
-                            tracks.addAll(response.body()?.results!!)
-                            adapter.notifyDataSetChanged()
+                            adapter.addAllTracks(response.body()?.results!!)
                             placeholderNothingFound.visibility = View.GONE
                             placeholderUploadFailed.visibility = View.GONE
                             buttonUpdate.visibility = View.GONE
@@ -159,6 +159,7 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val SAVE_STATE = "SAVE_STATE"
+        private const val SUCCESS_OK = 200
     }
 
 }
