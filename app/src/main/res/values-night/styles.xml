@@ -8,7 +8,6 @@
     <style name="ColorSwitch">
         <item name="thumbTint">@color/blue</item>
         <item name="trackTint">@color/light_blue</item>
-        <item name="android:checked">true</item>
     </style>
 
 </resources>
