@@ -11,7 +11,9 @@
     <dimen name="margin_8dp">8dp</dimen>
     <dimen name="margin_12dp">12dp</dimen>
     <dimen name="margin_16dp">16dp</dimen>
+    <dimen name="margin_20dp">20dp</dimen>
     <dimen name="margin_24dp">24dp</dimen>
+    <dimen name="margin_32dp">32dp</dimen>
     <dimen name="margin_102dp">102dp</dimen>
 
     <dimen name="small_corner_radius">2dp</dimen>

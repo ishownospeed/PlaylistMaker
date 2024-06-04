@@ -9,9 +9,11 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.practicum.playlistmaker.SearchHistory.Companion.TRACKS_PREFERENCES
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,15 +34,24 @@ class SearchActivity : AppCompatActivity() {
     private val trackService = retrofit.create(iTunesApi::class.java)
 
     private val tracks = mutableListOf<Track>()
-    private val adapter = TrackAdapter(tracks)
+    private lateinit var searchHistory: SearchHistory
+    private lateinit var adapterSearchHistory: TrackAdapter
+
+    private val adapterListTracks = TrackAdapter(tracks) {
+        searchHistory.saveTrackInHistory(it)
+        adapterSearchHistory.notifyDataSetChanged()
+    }
 
     private lateinit var buttonArrowLeft: ImageView
     private lateinit var clearButton: ImageView
     private lateinit var inputEditText: EditText
-    private lateinit var recycler: RecyclerView
+    private lateinit var recyclerListTracks: RecyclerView
     private lateinit var placeholderNothingFound: TextView
     private lateinit var placeholderUploadFailed: TextView
     private lateinit var buttonUpdate: TextView
+    private lateinit var containerHistory: LinearLayout
+    private lateinit var recyclerListTracksHistory: RecyclerView
+    private lateinit var buttonClearHistory: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,12 +60,27 @@ class SearchActivity : AppCompatActivity() {
         buttonArrowLeft = findViewById(R.id.arrowLeftSearch)
         clearButton = findViewById(R.id.clearIcon)
         inputEditText = findViewById(R.id.inputEditText)
-        recycler = findViewById(R.id.listTracks)
+        recyclerListTracks = findViewById(R.id.listTracks)
         placeholderNothingFound = findViewById(R.id.placeholderNothingFound)
         placeholderUploadFailed = findViewById(R.id.placeholderUploadFailed)
         buttonUpdate = findViewById(R.id.buttonUpdate)
+        containerHistory = findViewById(R.id.containerHistory)
+        recyclerListTracksHistory = findViewById(R.id.listTracksHistory)
+        buttonClearHistory = findViewById(R.id.buttonClearHistory)
 
-        recycler.adapter = adapter
+        searchHistory =
+            SearchHistory(getSharedPreferences(TRACKS_PREFERENCES, MODE_PRIVATE), mutableListOf())
+        adapterSearchHistory = TrackAdapter(searchHistory.getListSearchHistory()) {}
+
+        recyclerListTracks.adapter = adapterListTracks
+
+        recyclerListTracksHistory.adapter = adapterSearchHistory
+
+        buttonClearHistory.setOnClickListener {
+            adapterSearchHistory.clearTracks()
+            searchHistory.clearListSearchHistory()
+            containerHistory.visibility = View.GONE
+        }
 
         buttonArrowLeft.setOnClickListener { finish() }
 
@@ -63,10 +89,23 @@ class SearchActivity : AppCompatActivity() {
             val inputMethodManager =
                 getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(inputEditText.windowToken, 0)
-            adapter.clearTracks()
+            adapterListTracks.clearTracks()
             placeholderNothingFound.visibility = View.GONE
             placeholderUploadFailed.visibility = View.GONE
             buttonUpdate.visibility = View.GONE
+        }
+
+        containerHistory.visibility = if (searchHistory.getListSearchHistory().isNotEmpty()) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
+        inputEditText.setOnFocusChangeListener { view, hasFocus ->
+            containerHistory.visibility =
+                if (hasFocus && inputEditText.text.isEmpty() && searchHistory.getListSearchHistory()
+                        .isNotEmpty()
+                ) View.VISIBLE else View.GONE
         }
 
         val textWatcher = object : TextWatcher {
@@ -77,6 +116,18 @@ class SearchActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 clearButton.visibility = clearButtonVisibility(s)
                 inputValue = inputEditText.text.toString()
+
+                containerHistory.visibility =
+                    if (inputEditText.hasFocus() && s?.isEmpty() == true && searchHistory.getListSearchHistory()
+                            .isNotEmpty()
+                    ) View.VISIBLE else View.GONE
+
+                if (containerHistory.visibility == View.VISIBLE) {
+                    recyclerListTracks.visibility = View.GONE
+                } else {
+                    recyclerListTracks.visibility = View.VISIBLE
+                    adapterListTracks.clearTracks()
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -106,7 +157,7 @@ class SearchActivity : AppCompatActivity() {
                     if (response.code() == SUCCESS_OK) {
                         tracks.clear()
                         if (response.body()?.results?.isNotEmpty() == true) {
-                            adapter.addAllTracks(response.body()?.results!!)
+                            adapterListTracks.addAllTracks(response.body()?.results!!)
                             placeholderNothingFound.visibility = View.GONE
                             placeholderUploadFailed.visibility = View.GONE
                             buttonUpdate.visibility = View.GONE
