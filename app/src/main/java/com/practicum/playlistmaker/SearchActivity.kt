@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -40,6 +41,7 @@ class SearchActivity : AppCompatActivity() {
     private val adapterListTracks = TrackAdapter(tracks) {
         searchHistory.saveTrackInHistory(it)
         adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
+        moveMediaLibraryActivity(it)
     }
 
     private lateinit var buttonArrowLeft: ImageView
@@ -71,7 +73,9 @@ class SearchActivity : AppCompatActivity() {
         recyclerListTracks.adapter = adapterListTracks
 
         searchHistory = SearchHistory(this, mutableListOf())
-        adapterSearchHistory = TrackAdapter(searchHistory.getListSearchHistory()) {}
+        adapterSearchHistory = TrackAdapter(searchHistory.getListSearchHistory()) {
+            moveMediaLibraryActivity(it)
+        }
         adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
 
         recyclerListTracksHistory.adapter = adapterSearchHistory
@@ -150,6 +154,12 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    private fun moveMediaLibraryActivity(track: Track) {
+        val mediaLibraryIntent = Intent(this@SearchActivity, MediaLibraryActivity::class.java)
+        mediaLibraryIntent.putExtra(TRACK, track)
+        startActivity(mediaLibraryIntent)
+    }
+
     private fun responseServer() {
         trackService.search(inputEditText.text.toString())
             .enqueue(object : Callback<TrackResponse> {
@@ -206,5 +216,6 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         private const val SAVE_STATE = "SAVE_STATE"
         private const val SUCCESS_OK = 200
+        const val TRACK = "track"
     }
 }

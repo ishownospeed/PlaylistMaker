@@ -41,8 +41,8 @@ class App : Application() {
         )
     }
 
-    companion object {
-        private const val THEME_PREFERENCES = "theme_preferences"
-        private const val THEME_KEY = "key_for_theme"
+    private companion object {
+        const val THEME_PREFERENCES = "theme_preferences"
+        const val THEME_KEY = "key_for_theme"
     }
 }

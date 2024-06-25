@@ -58,9 +58,9 @@ class SearchHistory(
         return Gson().toJson(list)
     }
 
-    companion object {
-        private const val TRACKS_PREFERENCES = "tracks_preferences"
-        private const val NEW_LIST_TRACK_KEY = "new_list_track_key"
-        private const val MAX_SIZE_LIST = 10
+    private companion object {
+        const val TRACKS_PREFERENCES = "tracks_preferences"
+        const val NEW_LIST_TRACK_KEY = "new_list_track_key"
+        const val MAX_SIZE_LIST = 10
     }
 }
