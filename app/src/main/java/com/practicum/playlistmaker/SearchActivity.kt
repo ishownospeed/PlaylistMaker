@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -12,8 +13,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.practicum.playlistmaker.SearchHistory.Companion.TRACKS_PREFERENCES
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,7 +40,8 @@ class SearchActivity : AppCompatActivity() {
 
     private val adapterListTracks = TrackAdapter(tracks) {
         searchHistory.saveTrackInHistory(it)
-        adapterSearchHistory.notifyDataSetChanged()
+        adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
+        moveMediaLibraryActivity(it)
     }
 
     private lateinit var buttonArrowLeft: ImageView
@@ -68,11 +70,13 @@ class SearchActivity : AppCompatActivity() {
         recyclerListTracksHistory = findViewById(R.id.listTracksHistory)
         buttonClearHistory = findViewById(R.id.buttonClearHistory)
 
-        searchHistory =
-            SearchHistory(getSharedPreferences(TRACKS_PREFERENCES, MODE_PRIVATE), mutableListOf())
-        adapterSearchHistory = TrackAdapter(searchHistory.getListSearchHistory()) {}
-
         recyclerListTracks.adapter = adapterListTracks
+
+        searchHistory = SearchHistory(this, mutableListOf())
+        adapterSearchHistory = TrackAdapter(searchHistory.getListSearchHistory()) {
+            moveMediaLibraryActivity(it)
+        }
+        adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
 
         recyclerListTracksHistory.adapter = adapterSearchHistory
 
@@ -95,17 +99,12 @@ class SearchActivity : AppCompatActivity() {
             buttonUpdate.visibility = View.GONE
         }
 
-        containerHistory.visibility = if (searchHistory.getListSearchHistory().isNotEmpty()) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+        containerHistory.isVisible = searchHistory.getListSearchHistory().isNotEmpty()
 
         inputEditText.setOnFocusChangeListener { view, hasFocus ->
-            containerHistory.visibility =
-                if (hasFocus && inputEditText.text.isEmpty() && searchHistory.getListSearchHistory()
-                        .isNotEmpty()
-                ) View.VISIBLE else View.GONE
+            containerHistory.isVisible =
+                hasFocus && inputEditText.text.isEmpty() && searchHistory.getListSearchHistory()
+                    .isNotEmpty()
         }
 
         val textWatcher = object : TextWatcher {
@@ -114,13 +113,12 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                clearButton.visibility = clearButtonVisibility(s)
+                clearButton.isVisible = !s.isNullOrEmpty()
                 inputValue = inputEditText.text.toString()
 
-                containerHistory.visibility =
-                    if (inputEditText.hasFocus() && s?.isEmpty() == true && searchHistory.getListSearchHistory()
-                            .isNotEmpty()
-                    ) View.VISIBLE else View.GONE
+                containerHistory.isVisible =
+                    inputEditText.hasFocus() && s?.isEmpty() == true && searchHistory.getListSearchHistory()
+                        .isNotEmpty()
 
                 if (containerHistory.visibility == View.VISIBLE) {
                     recyclerListTracks.visibility = View.GONE
@@ -128,6 +126,15 @@ class SearchActivity : AppCompatActivity() {
                     recyclerListTracks.visibility = View.VISIBLE
                     adapterListTracks.clearTracks()
                 }
+
+                if (inputEditText.hasFocus() && s?.isEmpty() == true || searchHistory.getListSearchHistory()
+                        .isNotEmpty()
+                ) {
+                    placeholderNothingFound.visibility = View.GONE
+                    placeholderUploadFailed.visibility = View.GONE
+                    buttonUpdate.visibility = View.GONE
+                }
+
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -145,6 +152,12 @@ class SearchActivity : AppCompatActivity() {
             }
             false
         }
+    }
+
+    private fun moveMediaLibraryActivity(track: Track) {
+        val mediaLibraryIntent = Intent(this@SearchActivity, MediaLibraryActivity::class.java)
+        mediaLibraryIntent.putExtra(TRACK, track)
+        startActivity(mediaLibraryIntent)
     }
 
     private fun responseServer() {
@@ -200,17 +213,9 @@ class SearchActivity : AppCompatActivity() {
         inputValue = savedInstanceState.getString(SAVE_STATE).toString()
     }
 
-    private fun clearButtonVisibility(s: CharSequence?): Int {
-        return if (s.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
-    }
-
     companion object {
         private const val SAVE_STATE = "SAVE_STATE"
         private const val SUCCESS_OK = 200
+        const val TRACK = "track"
     }
-
 }

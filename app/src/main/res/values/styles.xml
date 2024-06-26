@@ -78,4 +78,20 @@
         <item name="android:background">@drawable/button_corners</item>
     </style>
 
+    <style name="TextLeftStyle">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:layout_marginBottom">@dimen/margin_16dp</item>
+    </style>
+
+    <style name="TextRightStyle">
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textColor">?attr/colorOnSecondary</item>
+        <item name="android:layout_marginBottom">@dimen/margin_16dp</item>
+    </style>
+
 </resources>

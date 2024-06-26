@@ -1,13 +1,18 @@
 package com.practicum.playlistmaker
 
+import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 
 class SearchHistory(
-    private val sharedPrefs: SharedPreferences,
+    context: Context,
     private var listSearchHistory: MutableList<Track>
 ) {
+
+    private val sharedPrefs: SharedPreferences =
+        context.getSharedPreferences(TRACKS_PREFERENCES, MODE_PRIVATE)
 
     init {
         listSearchHistory = getSearchHistory()
@@ -21,10 +26,10 @@ class SearchHistory(
     }
 
     fun saveTrackInHistory(item: Track) {
+        listSearchHistory.removeIf { it.trackId == item.trackId }
         if (listSearchHistory.size == MAX_SIZE_LIST) {
             listSearchHistory.removeLast()
         }
-        listSearchHistory.removeIf { it.trackId == item.trackId }
         listSearchHistory.add(0, item)
 
         sharedPrefs.edit()
@@ -53,9 +58,9 @@ class SearchHistory(
         return Gson().toJson(list)
     }
 
-    companion object {
+    private companion object {
         const val TRACKS_PREFERENCES = "tracks_preferences"
-        private const val NEW_LIST_TRACK_KEY = "new_list_track_key"
-        private const val MAX_SIZE_LIST = 10
+        const val NEW_LIST_TRACK_KEY = "new_list_track_key"
+        const val MAX_SIZE_LIST = 10
     }
 }
