@@ -3,14 +3,16 @@ package com.practicum.playlistmaker
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -34,14 +36,21 @@ class SearchActivity : AppCompatActivity() {
 
     private val trackService = retrofit.create(iTunesApi::class.java)
 
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val searchRunnable = Runnable { responseServer() }
+
     private val tracks = mutableListOf<Track>()
     private lateinit var searchHistory: SearchHistory
     private lateinit var adapterSearchHistory: TrackAdapter
 
     private val adapterListTracks = TrackAdapter(tracks) {
-        searchHistory.saveTrackInHistory(it)
-        adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
-        moveMediaLibraryActivity(it)
+        if (clickDebounce()) {
+            searchHistory.saveTrackInHistory(it)
+            adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
+            moveMediaLibraryActivity(it)
+        }
     }
 
     private lateinit var buttonArrowLeft: ImageView
@@ -54,6 +63,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var containerHistory: LinearLayout
     private lateinit var recyclerListTracksHistory: RecyclerView
     private lateinit var buttonClearHistory: TextView
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +79,7 @@ class SearchActivity : AppCompatActivity() {
         containerHistory = findViewById(R.id.containerHistory)
         recyclerListTracksHistory = findViewById(R.id.listTracksHistory)
         buttonClearHistory = findViewById(R.id.buttonClearHistory)
+        progressBar = findViewById(R.id.progressStatus)
 
         recyclerListTracks.adapter = adapterListTracks
 
@@ -101,7 +112,7 @@ class SearchActivity : AppCompatActivity() {
 
         containerHistory.isVisible = searchHistory.getListSearchHistory().isNotEmpty()
 
-        inputEditText.setOnFocusChangeListener { view, hasFocus ->
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
             containerHistory.isVisible =
                 hasFocus && inputEditText.text.isEmpty() && searchHistory.getListSearchHistory()
                     .isNotEmpty()
@@ -113,6 +124,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchDebounce()
                 clearButton.isVisible = !s.isNullOrEmpty()
                 inputValue = inputEditText.text.toString()
 
@@ -143,57 +155,62 @@ class SearchActivity : AppCompatActivity() {
         }
         inputEditText.addTextChangedListener(textWatcher)
 
-        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                if (inputEditText.text.isNotEmpty()) {
-                    responseServer()
-                }
-                true
-            }
-            false
-        }
     }
 
     private fun moveMediaLibraryActivity(track: Track) {
-        val mediaLibraryIntent = Intent(this@SearchActivity, MediaLibraryActivity::class.java)
+        val mediaLibraryIntent = Intent(this@SearchActivity, PlayerActivity::class.java)
         mediaLibraryIntent.putExtra(TRACK, track)
         startActivity(mediaLibraryIntent)
     }
 
     private fun responseServer() {
-        trackService.search(inputEditText.text.toString())
-            .enqueue(object : Callback<TrackResponse> {
-                override fun onResponse(
-                    call: Call<TrackResponse>,
-                    response: Response<TrackResponse>
-                ) {
-                    if (response.code() == SUCCESS_OK) {
-                        tracks.clear()
-                        if (response.body()?.results?.isNotEmpty() == true) {
-                            adapterListTracks.addAllTracks(response.body()?.results!!)
-                            placeholderNothingFound.visibility = View.GONE
-                            placeholderUploadFailed.visibility = View.GONE
-                            buttonUpdate.visibility = View.GONE
+        if (inputEditText.text.isNotEmpty()) {
+
+            placeholderNothingFound.visibility = View.GONE
+            placeholderUploadFailed.visibility = View.GONE
+            buttonUpdate.visibility = View.GONE
+            recyclerListTracks.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
+
+            trackService.search(inputEditText.text.toString())
+                .enqueue(object : Callback<TrackResponse> {
+                    override fun onResponse(
+                        call: Call<TrackResponse>,
+                        response: Response<TrackResponse>
+                    ) {
+                        progressBar.visibility = View.GONE
+                        if (response.code() == SUCCESS_OK) {
+                            tracks.clear()
+                            if (response.body()?.results?.isNotEmpty() == true) {
+                                recyclerListTracks.visibility = View.VISIBLE
+                                adapterListTracks.addAllTracks(response.body()?.results!!)
+                                placeholderNothingFound.visibility = View.GONE
+                                placeholderUploadFailed.visibility = View.GONE
+                                buttonUpdate.visibility = View.GONE
+                            }
+                            if (tracks.isEmpty()) {
+                                placeholderNothingFound.visibility = View.VISIBLE
+                                placeholderUploadFailed.visibility = View.GONE
+                                buttonUpdate.visibility = View.GONE
+                                progressBar.visibility = View.GONE
+                            }
+                        } else {
+                            showPlaceholderError()
                         }
-                        if (tracks.isEmpty()) {
-                            placeholderNothingFound.visibility = View.VISIBLE
-                            placeholderUploadFailed.visibility = View.GONE
-                            buttonUpdate.visibility = View.GONE
-                        }
-                    } else {
+                    }
+
+                    override fun onFailure(call: Call<TrackResponse>, t: Throwable) {
+                        progressBar.visibility = View.GONE
                         showPlaceholderError()
                     }
-                }
 
-                override fun onFailure(call: Call<TrackResponse>, t: Throwable) {
-                    showPlaceholderError()
-                }
-
-            })
+                })
+        }
     }
 
     private fun showPlaceholderError() {
         tracks.clear()
+        progressBar.visibility = View.GONE
         placeholderNothingFound.visibility = View.GONE
         placeholderUploadFailed.visibility = View.VISIBLE
         buttonUpdate.visibility = View.VISIBLE
@@ -201,6 +218,20 @@ class SearchActivity : AppCompatActivity() {
         buttonUpdate.setOnClickListener {
             responseServer()
         }
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -214,6 +245,8 @@ class SearchActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
         private const val SAVE_STATE = "SAVE_STATE"
         private const val SUCCESS_OK = 200
         const val TRACK = "track"
