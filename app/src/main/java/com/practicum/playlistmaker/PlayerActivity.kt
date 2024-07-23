@@ -58,6 +58,7 @@ class PlayerActivity : AppCompatActivity() {
                 yearName.text = track.releaseDate.substring(0, 4)
                 genreName.text = track.primaryGenreName
                 countryName.text = track.country
+                progressTime.text = DateTimeUtil.simpleFormatTrack(track.trackTimeMillis)
             }
         }
 
