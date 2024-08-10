@@ -21,6 +21,8 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySearchBinding
 
+    private val interactor = Creator.provideTracksInteractor()
+
     private var inputValue: String = ""
 
     private var isClickAllowed = true
@@ -35,7 +37,7 @@ class SearchActivity : AppCompatActivity() {
     private val adapterListTracks = TrackAdapter(tracks) {
         if (clickDebounce()) {
             searchHistory.saveTrackInHistory(it)
-            adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
+            adapterSearchHistory.updateTracks(searchHistory.getSearchHistory())
             moveMediaLibraryActivity(it)
         }
     }
@@ -47,10 +49,10 @@ class SearchActivity : AppCompatActivity() {
 
         binding.listTracks.adapter = adapterListTracks
 
-        adapterSearchHistory = TrackAdapter(searchHistory.getListSearchHistory()) {
+        adapterSearchHistory = TrackAdapter(searchHistory.getSearchHistory()) {
             moveMediaLibraryActivity(it)
         }
-        adapterSearchHistory.updateTracks(searchHistory.getListSearchHistory())
+        adapterSearchHistory.updateTracks(searchHistory.getSearchHistory())
 
         binding.listTracksHistory.adapter = adapterSearchHistory
 
@@ -73,11 +75,11 @@ class SearchActivity : AppCompatActivity() {
             binding.buttonUpdate.visibility = View.GONE
         }
 
-        binding.containerHistory.isVisible = searchHistory.getListSearchHistory().isNotEmpty()
+        binding.containerHistory.isVisible = searchHistory.getSearchHistory().isNotEmpty()
 
         binding.inputEditText.setOnFocusChangeListener { _, hasFocus ->
             binding.containerHistory.isVisible =
-                hasFocus && binding.inputEditText.text.isEmpty() && searchHistory.getListSearchHistory()
+                hasFocus && binding.inputEditText.text.isEmpty() && searchHistory.getSearchHistory()
                     .isNotEmpty()
         }
 
@@ -92,7 +94,7 @@ class SearchActivity : AppCompatActivity() {
                 inputValue = binding.inputEditText.text.toString()
 
                 binding.containerHistory.isVisible =
-                    binding.inputEditText.hasFocus() && s?.isEmpty() == true && searchHistory.getListSearchHistory()
+                    binding.inputEditText.hasFocus() && s?.isEmpty() == true && searchHistory.getSearchHistory()
                         .isNotEmpty()
 
                 if (binding.containerHistory.visibility == View.VISIBLE) {
@@ -102,7 +104,7 @@ class SearchActivity : AppCompatActivity() {
                     adapterListTracks.clearTracks()
                 }
 
-                if (binding.inputEditText.hasFocus() && s?.isEmpty() == true || searchHistory.getListSearchHistory()
+                if (binding.inputEditText.hasFocus() && s?.isEmpty() == true || searchHistory.getSearchHistory()
                         .isNotEmpty()
                 ) {
                     binding.placeholderNothingFound.visibility = View.GONE
@@ -136,8 +138,7 @@ class SearchActivity : AppCompatActivity() {
             binding.listTracks.visibility = View.GONE
             binding.progressStatus.visibility = View.VISIBLE
 
-            Creator.provideTracksInteractor()
-                .searchTracks(text, object : TracksInteractor.TracksConsumer {
+            interactor.searchTracks(text, object : TracksInteractor.TracksConsumer {
                     override fun onResponse(foundTracks: List<Track>) {
                         runOnUiThread {
                             binding.progressStatus.visibility = View.GONE
