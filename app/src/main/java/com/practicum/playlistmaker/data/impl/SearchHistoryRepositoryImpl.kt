@@ -1,31 +1,30 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.data.impl
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.practicum.playlistmaker.domain.api.SearchHistoryRepository
+import com.practicum.playlistmaker.domain.models.Track
 
-class SearchHistory(
-    context: Context,
-    private var listSearchHistory: MutableList<Track>
-) {
+class SearchHistoryRepositoryImpl(context: Context) : SearchHistoryRepository {
 
     private val sharedPrefs: SharedPreferences =
         context.getSharedPreferences(TRACKS_PREFERENCES, MODE_PRIVATE)
 
+    private var listSearchHistory = mutableListOf<Track>()
+
     init {
-        listSearchHistory = getSearchHistory()
+        listSearchHistory = getListSearchHistory()
     }
 
-    fun getListSearchHistory(): MutableList<Track> = listSearchHistory
-
-    fun clearListSearchHistory() {
+    override fun clearListSearchHistory() {
         listSearchHistory.clear()
         sharedPrefs.edit().remove(NEW_LIST_TRACK_KEY).apply()
     }
 
-    fun saveTrackInHistory(item: Track) {
+    override fun saveTrackInHistory(item: Track) {
         listSearchHistory.removeIf { it.trackId == item.trackId }
         if (listSearchHistory.size == MAX_SIZE_LIST) {
             listSearchHistory.removeLast()
@@ -37,7 +36,11 @@ class SearchHistory(
             .apply()
     }
 
-    private fun getSearchHistory(): MutableList<Track> {
+    override fun getSearchHistory(): MutableList<Track> {
+        return listSearchHistory
+    }
+
+    private fun getListSearchHistory(): MutableList<Track> {
         val jsonTracks = sharedPrefs.getString(NEW_LIST_TRACK_KEY, null)
         if (jsonTracks != null) {
             listSearchHistory.addAll(createListTracksFromJson(jsonTracks))
