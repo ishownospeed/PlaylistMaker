@@ -1,15 +1,17 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.domain.impl
 
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.practicum.playlistmaker.domain.api.SearchHistoryInteractor
+import com.practicum.playlistmaker.domain.models.Track
 
-class SearchHistory(
+class SearchHistoryInteractorImpl(
     context: Context,
-    private var listSearchHistory: MutableList<Track>
-) {
+    private var listSearchHistory: MutableList<Track> = mutableListOf()
+) : SearchHistoryInteractor {
 
     private val sharedPrefs: SharedPreferences =
         context.getSharedPreferences(TRACKS_PREFERENCES, MODE_PRIVATE)
@@ -25,7 +27,7 @@ class SearchHistory(
         sharedPrefs.edit().remove(NEW_LIST_TRACK_KEY).apply()
     }
 
-    fun saveTrackInHistory(item: Track) {
+    override fun saveTrackInHistory(item: Track) {
         listSearchHistory.removeIf { it.trackId == item.trackId }
         if (listSearchHistory.size == MAX_SIZE_LIST) {
             listSearchHistory.removeLast()
@@ -37,7 +39,7 @@ class SearchHistory(
             .apply()
     }
 
-    private fun getSearchHistory(): MutableList<Track> {
+    override fun getSearchHistory(): MutableList<Track> {
         val jsonTracks = sharedPrefs.getString(NEW_LIST_TRACK_KEY, null)
         if (jsonTracks != null) {
             listSearchHistory.addAll(createListTracksFromJson(jsonTracks))
@@ -45,7 +47,7 @@ class SearchHistory(
         return listSearchHistory
     }
 
-    private fun createListTracksFromJson(json: String): MutableList<Track> {
+    override fun createListTracksFromJson(json: String): MutableList<Track> {
         return try {
             Gson().fromJson(json, Array<Track>::class.java).toMutableList()
         } catch (e: JsonSyntaxException) {
@@ -54,7 +56,7 @@ class SearchHistory(
         }
     }
 
-    private fun createJsonFromListTracks(list: MutableList<Track>): String {
+    override fun createJsonFromListTracks(list: MutableList<Track>): String {
         return Gson().toJson(list)
     }
 
@@ -63,4 +65,5 @@ class SearchHistory(
         const val NEW_LIST_TRACK_KEY = "new_list_track_key"
         const val MAX_SIZE_LIST = 10
     }
+
 }

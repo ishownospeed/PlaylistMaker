@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.utils
 
 import android.icu.text.SimpleDateFormat
 import java.util.Locale

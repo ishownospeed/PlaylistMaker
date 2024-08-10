@@ -1,32 +1,33 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.practicum.playlistmaker.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val buttonSearch = findViewById<Button>(R.id.button_search)
-        val buttonMediaLibrary = findViewById<Button>(R.id.button_media_library)
-        val buttonSettings = findViewById<Button>(R.id.button_settings)
-
-        buttonSearch.setOnClickListener {
+        binding.buttonSearch.setOnClickListener {
             val searchIntent = Intent(this, SearchActivity::class.java)
             startActivity(searchIntent)
         }
 
-        buttonMediaLibrary.setOnClickListener {
+        binding.buttonMediaLibrary.setOnClickListener {
             val mediaLibraryIntent = Intent(this, PlayerActivity::class.java)
             startActivity(mediaLibraryIntent)
         }
 
-        buttonSettings.setOnClickListener {
+        binding.buttonSettings.setOnClickListener {
             val settingsIntent = Intent(this, SettingsActivity::class.java)
             startActivity(settingsIntent)
         }
     }
+
 }

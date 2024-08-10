@@ -1,14 +1,19 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.databinding.TrackViewBinding
+import com.practicum.playlistmaker.domain.models.Track
 
 class TrackAdapter(
     private var tracks: MutableList<Track>,
     private val onItemClickListener: OnItemClickListener
-) : RecyclerView.Adapter<TrackViewHolder>() {
+) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
     fun updateTracks(newTracks: MutableList<Track>) {
         val oldTracks = tracks
@@ -35,7 +40,7 @@ class TrackAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.track_view, parent, false)
+        val view = TrackViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TrackViewHolder(view)
     }
 
@@ -43,9 +48,6 @@ class TrackAdapter(
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         holder.bind(tracks[position])
-        holder.itemView.setOnClickListener {
-            onItemClickListener.onItemClick(tracks[position])
-        }
     }
 
     fun clearTracks() {
@@ -57,4 +59,30 @@ class TrackAdapter(
         tracks.addAll(trackList)
         this.notifyDataSetChanged()
     }
+
+    fun interface OnItemClickListener {
+        fun onItemClick(item: Track)
+    }
+
+    inner class TrackViewHolder(private val binding: TrackViewBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(item: Track) {
+            Glide.with(itemView)
+                .load(item.artworkUrl100)
+                .placeholder(R.drawable.ic_placeholder)
+                .fitCenter()
+                .transform(RoundedCorners(itemView.resources.getDimensionPixelSize(R.dimen.small_corner_radius)))
+                .into(binding.trackImage)
+
+            binding.trackName.text = item.trackName
+            binding.artistName.text = item.artistName
+            binding.trackTime.text = item.trackTimeMillis
+
+            binding.root.setOnClickListener {
+                onItemClickListener.onItemClick(item)
+            }
+        }
+    }
+
 }
