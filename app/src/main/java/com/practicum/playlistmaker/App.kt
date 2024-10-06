@@ -1,39 +1,26 @@
 package com.practicum.playlistmaker
 
 import android.app.Application
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
+import com.practicum.playlistmaker.creator.Creator
 
 class App : Application() {
 
-    private var darkTheme = false
+    private lateinit var sharedPrefs: SharedPreferences
 
     override fun onCreate() {
         super.onCreate()
-        val sharedPrefs = getSharedPreferences(THEME_PREFERENCES, MODE_PRIVATE)
-        val theme = sharedPrefs.getBoolean(THEME_KEY, false)
-
-        if (sharedPrefs.contains(THEME_KEY)) switchTheme(theme) else savePrimaryTheme()
+        Creator.initApplication(this)
+        sharedPrefs = Creator.provideSharedPreferences()
+        if (sharedPrefs.contains(THEME_KEY)) switchTheme() else savePrimaryTheme()
     }
 
-    private fun savePrimaryTheme() {
-        darkTheme =
-            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+    private fun switchTheme() {
+        val darkTheme = sharedPrefs.getBoolean(THEME_KEY, false)
         AppCompatDelegate.setDefaultNightMode(
-            if (darkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
-        )
-        saveStateTheme(darkTheme)
-    }
-
-    fun saveStateTheme(checked: Boolean) {
-        getSharedPreferences(THEME_PREFERENCES, MODE_PRIVATE).edit().putBoolean(THEME_KEY, checked)
-            .apply()
-    }
-
-    fun switchTheme(darkThemeEnabled: Boolean) {
-        darkTheme = darkThemeEnabled
-        AppCompatDelegate.setDefaultNightMode(
-            if (darkThemeEnabled) {
+            if (darkTheme) {
                 AppCompatDelegate.MODE_NIGHT_YES
             } else {
                 AppCompatDelegate.MODE_NIGHT_NO
@@ -41,8 +28,20 @@ class App : Application() {
         )
     }
 
+    private fun savePrimaryTheme() {
+        val darkTheme =
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        AppCompatDelegate.setDefaultNightMode(
+            if (darkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+        )
+        saveStateTheme(darkTheme)
+    }
+
+    private fun saveStateTheme(checked: Boolean) {
+        sharedPrefs.edit().putBoolean(THEME_KEY, checked).apply()
+    }
+
     private companion object {
-        const val THEME_PREFERENCES = "theme_preferences"
         const val THEME_KEY = "key_for_theme"
     }
 }
