@@ -41,6 +41,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.koin.android)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)

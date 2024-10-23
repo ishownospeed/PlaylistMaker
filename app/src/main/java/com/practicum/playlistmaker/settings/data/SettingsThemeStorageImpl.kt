@@ -13,6 +13,7 @@ class SettingsThemeStorageImpl(private val sharedPreferences: SharedPreferences)
     }
 
     override fun saveThemeSettings(select: Theme) {
+        sharedPreferences.edit().putBoolean(THEME_KEY, select.darkTheme).apply()
         AppCompatDelegate.setDefaultNightMode(
             if (select.darkTheme) {
                 AppCompatDelegate.MODE_NIGHT_YES
@@ -20,10 +21,10 @@ class SettingsThemeStorageImpl(private val sharedPreferences: SharedPreferences)
                 AppCompatDelegate.MODE_NIGHT_NO
             }
         )
-        sharedPreferences.edit().putBoolean(THEME_KEY, select.darkTheme).apply()
     }
 
     private companion object {
         const val THEME_KEY = "key_for_theme"
     }
+
 }

@@ -3,10 +3,6 @@ package com.practicum.playlistmaker.settings.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.practicum.playlistmaker.creator.Creator
 import com.practicum.playlistmaker.settings.domain.SettingsInteractor
 import com.practicum.playlistmaker.settings.domain.Theme
 import com.practicum.playlistmaker.sharing.domain.SharingInteractor
@@ -39,19 +35,6 @@ class SettingsViewModel(
 
     fun openTermsUse() {
         sharingInteractor.openTermsUse()
-    }
-
-    companion object {
-        fun getViewModelFactory(): ViewModelProvider.Factory {
-            return viewModelFactory {
-                initializer {
-                    SettingsViewModel(
-                        settingsInteractor = Creator.provideSettingsInteractor(),
-                        sharingInteractor = Creator.provideSharingInteractor()
-                    )
-                }
-            }
-        }
     }
 
 }

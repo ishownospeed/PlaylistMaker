@@ -5,10 +5,6 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.practicum.playlistmaker.creator.Creator
 import com.practicum.playlistmaker.player.domain.api.AudioPlayerInteractor
 import com.practicum.playlistmaker.player.domain.models.Track
 import com.practicum.playlistmaker.utils.DateTimeUtil
@@ -86,16 +82,6 @@ class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) 
         const val STATE_PLAYING = 2
         const val STATE_PAUSED = 3
         const val STATE_COMPLETED = 4
-
-        fun getViewModelFactory(): ViewModelProvider.Factory {
-            return viewModelFactory {
-                initializer {
-                    PlayerViewModel(
-                        audioPlayerInteractor = Creator.provideAudioPlayerInteractor()
-                    )
-                }
-            }
-        }
     }
 
 }

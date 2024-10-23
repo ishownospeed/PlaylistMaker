@@ -8,7 +8,7 @@ import com.google.gson.JsonSyntaxException
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryRepository
 import com.practicum.playlistmaker.search.domain.models.Track
 
-class SearchHistoryRepositoryImpl(context: Context) : SearchHistoryRepository {
+class SearchHistoryRepositoryImpl(context: Context, private val gson: Gson) : SearchHistoryRepository {
 
     private val sharedPrefs: SharedPreferences =
         context.getSharedPreferences(TRACKS_PREFERENCES, MODE_PRIVATE)
@@ -27,7 +27,7 @@ class SearchHistoryRepositoryImpl(context: Context) : SearchHistoryRepository {
     override fun saveTrackInHistory(item: Track) {
         listSearchHistory.removeIf { it.trackId == item.trackId }
         if (listSearchHistory.size == MAX_SIZE_LIST) {
-            listSearchHistory.removeLast()
+            listSearchHistory.removeAt(listSearchHistory.lastIndex)
         }
         listSearchHistory.add(0, item)
 
@@ -50,15 +50,15 @@ class SearchHistoryRepositoryImpl(context: Context) : SearchHistoryRepository {
 
     private fun createListTracksFromJson(json: String): MutableList<Track> {
         return try {
-            Gson().fromJson(json, Array<Track>::class.java).toMutableList()
+            gson.fromJson(json, Array<Track>::class.java).toMutableList()
         } catch (e: JsonSyntaxException) {
-            val track = Gson().fromJson(json, Track::class.java)
+            val track = gson.fromJson(json, Track::class.java)
             mutableListOf(track)
         }
     }
 
     private fun createJsonFromListTracks(list: MutableList<Track>): String {
-        return Gson().toJson(list)
+        return gson.toJson(list)
     }
 
     private companion object {
