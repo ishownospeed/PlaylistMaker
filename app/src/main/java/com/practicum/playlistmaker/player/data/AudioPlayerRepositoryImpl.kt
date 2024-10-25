@@ -2,7 +2,7 @@ package com.practicum.playlistmaker.player.data
 
 import com.practicum.playlistmaker.player.domain.api.AudioPlayerRepository
 
-class AudioPlayerRepositoryImpl(private val audioPlayer: AudioPlayerImpl) : AudioPlayerRepository {
+class AudioPlayerRepositoryImpl(private val audioPlayer: AudioPlayer) : AudioPlayerRepository {
 
     override fun prepare(trackUrl: String, onPrepared: () -> Unit, onCompletion: () -> Unit) {
         audioPlayer.prepare(trackUrl, onPrepared, onCompletion)
