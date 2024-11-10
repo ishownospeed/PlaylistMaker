@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    style="@style/MainActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="@dimen/padding_16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginBottom="@dimen/margin_16dp"
+        android:fontFamily="@font/ys_display_medium"
+        android:text="@string/app_name"
+        android:textColor="?attr/colorPrimary"
+        android:textFontWeight="500"
+        android:textSize="@dimen/primary_text_size" />
+
+    <Button
+        android:id="@+id/button_search"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/margin_16dp"
+        android:layout_weight="1"
+        android:text="@string/search"
+        app:icon="@drawable/ic_search" />
+
+    <Button
+        android:id="@+id/button_media_library"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/margin_6dp"
+        android:layout_weight="1"
+        android:text="@string/media_library"
+        app:icon="@drawable/ic_media_library" />
+
+    <Button
+        android:id="@+id/button_settings"
+        style="@style/ButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/margin_6dp"
+        android:layout_marginBottom="@dimen/margin_12dp"
+        android:layout_weight="1"
+        android:text="@string/settings"
+        app:icon="@drawable/ic_settings" />
+
+</LinearLayout>
