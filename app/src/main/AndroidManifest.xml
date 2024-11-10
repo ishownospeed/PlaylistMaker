@@ -15,18 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PlaylistMaker"
         tools:targetApi="31">
-        <activity
-            android:name=".player.ui.PlayerActivity"
-            android:exported="false" />
-        <activity
-            android:name=".search.ui.SearchActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:exported="false" />
-        <activity
-            android:name=".settings.ui.SettingsActivity"
-            android:exported="false" />
+
         <activity
             android:name=".main.ui.MainActivity"
+            android:windowSoftInputMode="adjustPan"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
