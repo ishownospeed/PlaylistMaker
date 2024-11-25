@@ -11,7 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.commit
+import androidx.navigation.fragment.findNavController
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.main.ui.base.BaseFragment
@@ -40,8 +40,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.arrowLeftSearch.setOnClickListener { parentFragmentManager.popBackStack() }
 
         binding.clearIcon.setOnClickListener {
             binding.inputEditText.setText("")
@@ -92,12 +90,12 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
         searchAdapter = TrackAdapter { track ->
             viewModel.saveTrackInHistory(track)
-            movePlayerActivity(track)
+            movePlayerFragment(track)
         }
 
         historyAdapter = TrackAdapter { track ->
             viewModel.saveTrackInHistory(track)
-            movePlayerActivity(track)
+            movePlayerFragment(track)
         }
 
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
@@ -182,13 +180,12 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         inputMethodManager.hideSoftInputFromWindow(binding.inputEditText.windowToken, 0)
     }
 
-    private fun movePlayerActivity(track: Track) {
+    private fun movePlayerFragment(track: Track) {
         if (clickDebounce()) {
-            parentFragmentManager.commit {
-                add(R.id.fragment_container, PlayerFragment.newInstance(track))
-                addToBackStack(null)
-                setReorderingAllowed(true)
-            }
+            findNavController().navigate(
+                R.id.action_searchFragment_to_playerFragment,
+                PlayerFragment.createArgs(track)
+            )
         }
     }
 

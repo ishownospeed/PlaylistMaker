@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
@@ -19,11 +21,8 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
     companion object {
         private const val TRACK = "track"
 
-        fun newInstance(track: Track) = PlayerFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable(TRACK, track)
-            }
-        }
+        fun createArgs(track: Track): Bundle =
+            bundleOf(TRACK to track)
     }
 
     override fun createBinding(
@@ -36,9 +35,9 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.backArrowButton.setOnClickListener { parentFragmentManager.popBackStack() }
+        binding.backArrowButton.setOnClickListener { findNavController().navigateUp() }
 
-        val track: Track? = arguments?.getParcelable(TRACK)
+        val track: Track? = requireArguments().getParcelable(TRACK)
 
         if (track != null) {
             initTrack(track)

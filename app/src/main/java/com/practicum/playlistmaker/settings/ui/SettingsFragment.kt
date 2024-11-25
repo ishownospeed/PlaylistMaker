@@ -23,8 +23,6 @@ class SettingsFragment : BaseFragment<FragmentSettingsBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.arrowLeftSettings.setOnClickListener { parentFragmentManager.popBackStack() }
-
         viewModel.theme.observe(viewLifecycleOwner) { select ->
             binding.themeSwitcher.isChecked = select.darkTheme
         }
