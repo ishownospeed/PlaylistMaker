@@ -109,7 +109,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
     private fun clearListOnClick() {
         searchAdapter.clearTracks()
-        binding.containerHistory.isVisible = historyAdapter.itemCount > 0
+        binding.containerHistory.isVisible = viewModel.isNotEmptySearchHistory()
         binding.placeholderNothingFound.isVisible = false
         binding.placeholderUploadFailed.isVisible = false
         binding.buttonUpdate.isVisible = false
