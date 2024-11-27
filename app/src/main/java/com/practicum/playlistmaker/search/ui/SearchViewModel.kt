@@ -21,7 +21,7 @@ class SearchViewModel(
         search(newSearchText)
     }
 
-    val tracks = mutableListOf<Track>()
+    private val tracks = mutableListOf<Track>()
 
     private val _state = MutableLiveData<SearchState>()
     val state: LiveData<SearchState> get() = _state
@@ -61,6 +61,9 @@ class SearchViewModel(
         if (hasFocus && input.isEmpty() && searchHistory.isNotEmpty()) {
             handler.removeCallbacks(searchRunnable)
             _state.postValue(SearchState.HistoryList(searchHistory))
+        } else if (tracks.isNotEmpty() && latestSearchText == input) {
+            handler.removeCallbacks(searchRunnable)
+            _state.postValue(SearchState.SearchList(tracks))
         } else {
             searchDebounce(input)
         }

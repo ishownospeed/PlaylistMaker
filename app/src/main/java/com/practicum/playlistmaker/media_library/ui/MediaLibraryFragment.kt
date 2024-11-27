@@ -23,12 +23,8 @@ class MediaLibraryFragment : BaseFragment<FragmentMediaLibraryBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.arrowLeft.setOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
         binding.viewPager.adapter = MediaLibraryViewPagerAdapter(
-            fragmentManager = parentFragmentManager,
+            fragmentManager = childFragmentManager,
             lifecycle = lifecycle
         )
 
@@ -41,8 +37,8 @@ class MediaLibraryFragment : BaseFragment<FragmentMediaLibraryBinding>() {
         tabMediator.attach()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         tabMediator.detach()
     }
 }

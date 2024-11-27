@@ -52,9 +52,11 @@ class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) 
     }
 
     fun pausePlayer() {
-        audioPlayerInteractor.pausePlayback()
-        _playerState.postValue(STATE_PAUSED)
-        stopProgressUpdates()
+        if (_playerState.value != STATE_PREPARED) {
+            audioPlayerInteractor.pausePlayback()
+            _playerState.postValue(STATE_PAUSED)
+            stopProgressUpdates()
+        }
     }
 
     override fun onCleared() {
