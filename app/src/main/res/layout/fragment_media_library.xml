@@ -27,6 +27,7 @@
         android:textAllCaps="false"
         android:textSize="@dimen/text_size_14sp"
         app:tabIndicatorColor="?attr/colorOnSecondary"
+        app:tabTextAppearance="@style/TextAppearance.AppCompat"
         app:tabTextColor="?attr/colorOnSecondary" />
 
     <androidx.viewpager2.widget.ViewPager2

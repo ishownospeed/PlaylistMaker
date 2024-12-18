@@ -49,9 +49,7 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
         }
 
         viewModel.track.observe(viewLifecycleOwner) {
-            binding.progressTime.text =
-                if (it?.currentPosition.equals("00:00")) track?.trackTimeMillis
-                else it?.currentPosition
+            binding.progressTime.text = it?.currentPosition
         }
 
         viewModel.playerState.observe(viewLifecycleOwner) { state ->

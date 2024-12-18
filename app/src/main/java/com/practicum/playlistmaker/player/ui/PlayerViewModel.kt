@@ -1,33 +1,25 @@
 package com.practicum.playlistmaker.player.ui
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.player.domain.api.AudioPlayerInteractor
 import com.practicum.playlistmaker.player.domain.models.Track
 import com.practicum.playlistmaker.utils.DateTimeUtil
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) : ViewModel() {
 
-    private val handler = Handler(Looper.getMainLooper())
+    private var timerJob: Job? = null
 
     private val _track = MutableLiveData(Track())
     val track: LiveData<Track> get() = _track
 
     private val _playerState = MutableLiveData(STATE_DEFAULT)
     val playerState: LiveData<Int> get() = _playerState
-
-    private val currentPosition = object : Runnable {
-        override fun run() {
-            if (audioPlayerInteractor.isPlaying()) {
-                val time = DateTimeUtil.simpleFormatTrack(audioPlayerInteractor.getPlaybackPosition().toLong())
-                _track.postValue(_track.value?.copy(currentPosition = time))
-                handler.postDelayed(this, DELAY)
-            }
-        }
-    }
 
     fun preparePlayer(trackUrl: String) {
         if (playerState.value == STATE_DEFAULT) {
@@ -48,7 +40,17 @@ class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) 
     fun startPlayer() {
         audioPlayerInteractor.startPlayback()
         _playerState.postValue(STATE_PLAYING)
-        handler.post(currentPosition)
+        startTimer()
+    }
+
+    private fun startTimer() {
+        timerJob = viewModelScope.launch {
+            while (audioPlayerInteractor.isPlaying()) {
+                delay(DELAY)
+                val time = DateTimeUtil.simpleFormatTrack(audioPlayerInteractor.getPlaybackPosition().toLong())
+                _track.postValue(_track.value?.copy(currentPosition = time))
+            }
+        }
     }
 
     fun pausePlayer() {
@@ -74,11 +76,11 @@ class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) 
     }
 
     private fun stopProgressUpdates() {
-        handler.removeCallbacks(currentPosition)
+        timerJob?.cancel()
     }
 
     companion object {
-        private const val DELAY = 400L
+        private const val DELAY = 300L
         private const val STATE_DEFAULT = 0
         const val STATE_PREPARED = 1
         const val STATE_PLAYING = 2

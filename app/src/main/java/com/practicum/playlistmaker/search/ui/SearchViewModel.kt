@@ -1,25 +1,24 @@
 package com.practicum.playlistmaker.search.ui
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryInteractor
 import com.practicum.playlistmaker.search.domain.api.TracksInteractor
 import com.practicum.playlistmaker.search.domain.models.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val tracksInteractor: TracksInteractor,
     private val searchHistoryInteractor: SearchHistoryInteractor
 ) : ViewModel() {
 
-    private val handler = Handler(Looper.getMainLooper())
     private var latestSearchText: String = ""
-    private val searchRunnable = Runnable {
-        val newSearchText = latestSearchText
-        search(newSearchText)
-    }
+
+    private var searchJob: Job? = null
 
     private val tracks = mutableListOf<Track>()
 
@@ -36,22 +35,22 @@ class SearchViewModel(
         if (newSearchText.isNotEmpty()) {
             renderState(SearchState.Loading)
 
-            tracksInteractor.searchTracks(newSearchText, object : TracksInteractor.TracksConsumer {
-                override fun onResponse(foundTracks: List<Track>) {
-                    tracks.clear()
-                    tracks.addAll(foundTracks)
-                    hideKeyboard()
-
-                    when {
-                        tracks.isEmpty() -> renderState(SearchState.Empty)
-                        else -> renderState(SearchState.SearchList(tracks = tracks))
+            viewModelScope.launch {
+                tracksInteractor
+                    .searchTracks(newSearchText)
+                    .collect { (foundTracks, errorMessage) ->
+                        if (foundTracks != null) {
+                            tracks.clear()
+                            tracks.addAll(foundTracks)
+                            hideKeyboard()
+                        }
+                        when {
+                            errorMessage != null -> renderState(SearchState.Error)
+                            tracks.isEmpty() -> renderState(SearchState.Empty)
+                            else -> renderState(SearchState.SearchList(tracks = tracks))
+                        }
                     }
-                }
-
-                override fun onFailure(t: Throwable) {
-                    renderState(SearchState.Error)
-                }
-            })
+            }
         }
     }
 
@@ -59,10 +58,8 @@ class SearchViewModel(
         val searchHistory = searchHistoryInteractor.getSearchHistory()
         _isClearIconVisibile.postValue(input.isNotEmpty())
         if (hasFocus && input.isEmpty() && searchHistory.isNotEmpty()) {
-            handler.removeCallbacks(searchRunnable)
             _state.postValue(SearchState.HistoryList(searchHistory))
         } else if (tracks.isNotEmpty() && latestSearchText == input) {
-            handler.removeCallbacks(searchRunnable)
             _state.postValue(SearchState.SearchList(tracks))
         } else {
             searchDebounce(input)
@@ -102,12 +99,19 @@ class SearchViewModel(
 
     private fun searchDebounce(changedText: String) {
         latestSearchText = changedText
-        handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+            if (latestSearchText == changedText) {
+                search(latestSearchText)
+            }
+        }
     }
 
     override fun onCleared() {
-        handler.removeCallbacksAndMessages(null)
+        super.onCleared()
+        searchJob?.cancel()
     }
 
     companion object {
