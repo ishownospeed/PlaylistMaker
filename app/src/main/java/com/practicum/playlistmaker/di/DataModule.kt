@@ -2,7 +2,9 @@ package com.practicum.playlistmaker.di
 
 import android.content.Context
 import android.media.MediaPlayer
+import androidx.room.Room
 import com.google.gson.Gson
+import com.practicum.playlistmaker.media_library.data.db.AppDatabase
 import com.practicum.playlistmaker.player.data.AudioPlayer
 import com.practicum.playlistmaker.player.data.AudioPlayerImpl
 import com.practicum.playlistmaker.search.data.network.NetworkClient
@@ -44,6 +46,10 @@ val dataModule = module {
 
     factory<AudioPlayer> {
         AudioPlayerImpl(get())
+    }
+
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db").build()
     }
 
 }

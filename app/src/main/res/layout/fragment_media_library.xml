@@ -26,6 +26,7 @@
         android:fontFamily="@font/ys_display_medium"
         android:textAllCaps="false"
         android:textSize="@dimen/text_size_14sp"
+        app:tabIndicatorFullWidth="false"
         app:tabIndicatorColor="?attr/colorOnSecondary"
         app:tabTextAppearance="@style/TextAppearance.AppCompat"
         app:tabTextColor="?attr/colorOnSecondary" />

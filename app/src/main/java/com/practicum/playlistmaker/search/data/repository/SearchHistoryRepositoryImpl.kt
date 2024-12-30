@@ -4,11 +4,19 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
+import com.practicum.playlistmaker.media_library.data.db.AppDatabase
 import com.practicum.playlistmaker.search.domain.api.SearchHistoryRepository
 import com.practicum.playlistmaker.search.domain.models.Track
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class SearchHistoryRepositoryImpl(context: Context, private val gson: Gson) : SearchHistoryRepository {
+class SearchHistoryRepositoryImpl(
+    context: Context,
+    private val gson: Gson,
+    private val appDatabase: AppDatabase
+) : SearchHistoryRepository {
 
     private val sharedPrefs: SharedPreferences =
         context.getSharedPreferences(TRACKS_PREFERENCES, MODE_PRIVATE)
@@ -43,18 +51,35 @@ class SearchHistoryRepositoryImpl(context: Context, private val gson: Gson) : Se
     private fun getListSearchHistory(): MutableList<Track> {
         val jsonTracks = sharedPrefs.getString(NEW_LIST_TRACK_KEY, null)
         if (jsonTracks != null) {
-            listSearchHistory.addAll(createListTracksFromJson(jsonTracks))
+            CoroutineScope(Dispatchers.IO).launch {
+                val favoriteTrackIds = appDatabase.favoriteTracksDao().getFavoriteIdList()
+
+                val data = createListTracksFromJson(jsonTracks).map {
+                    val isFavorite = it.trackId in favoriteTrackIds
+
+                    Track(
+                        trackId = it.trackId,
+                        trackName = it.trackName,
+                        artistName = it.artistName,
+                        trackTimeMillis = it.trackTimeMillis,
+                        artworkUrl100 = it.artworkUrl100,
+                        collectionName = it.collectionName,
+                        releaseDate = it.releaseDate,
+                        primaryGenreName = it.primaryGenreName,
+                        country = it.country,
+                        previewUrl = it.previewUrl,
+                        isFavorite = isFavorite
+                    )
+                }
+                listSearchHistory.addAll(data)
+            }
         }
         return listSearchHistory
     }
 
-    private fun createListTracksFromJson(json: String): MutableList<Track> {
-        return try {
-            gson.fromJson(json, Array<Track>::class.java).toMutableList()
-        } catch (e: JsonSyntaxException) {
-            val track = gson.fromJson(json, Track::class.java)
-            mutableListOf(track)
-        }
+    private fun createListTracksFromJson(json: String): List<Track> {
+        val type = object : TypeToken<List<Track>>() {}.type
+        return gson.fromJson(json, type)
     }
 
     private fun createJsonFromListTracks(list: MutableList<Track>): String {

@@ -4,22 +4,49 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.playlistmaker.media_library.domain.api.FavoriteTrackInteractor
 import com.practicum.playlistmaker.player.domain.api.AudioPlayerInteractor
-import com.practicum.playlistmaker.player.domain.models.Track
+import com.practicum.playlistmaker.player.domain.models.TrackInfo
+import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.utils.DateTimeUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) : ViewModel() {
+class PlayerViewModel(
+    private val audioPlayerInteractor: AudioPlayerInteractor,
+    private val favoriteTrackInteractor: FavoriteTrackInteractor
+) : ViewModel() {
 
     private var timerJob: Job? = null
 
-    private val _track = MutableLiveData(Track())
-    val track: LiveData<Track> get() = _track
+    private val _trackInfo = MutableLiveData(TrackInfo())
+    val trackInfo: LiveData<TrackInfo> get() = _trackInfo
 
     private val _playerState = MutableLiveData(STATE_DEFAULT)
     val playerState: LiveData<Int> get() = _playerState
+
+    private val _isFavorite = MutableLiveData<Boolean>()
+    val isFavorite: LiveData<Boolean> get() = _isFavorite
+
+//    fun checkTrackIsFavorite(trackId: Int) {
+//        viewModelScope.launch {
+//            val favoriteStatus = favoriteTrackInteractor.isTrackFavorite(trackId)
+//            _isFavorite.postValue(favoriteStatus)
+//        }
+//    }
+
+    fun onFavoriteClicked(track: Track) {
+        viewModelScope.launch {
+            if (_isFavorite.value == true) {
+                favoriteTrackInteractor.removeTrackFromFavorites(track)
+                _isFavorite.postValue(false)
+            } else {
+                favoriteTrackInteractor.addTrackToFavorites(track.apply { this.isFavorite= true })
+                _isFavorite.postValue(true)
+            }
+        }
+    }
 
     fun preparePlayer(trackUrl: String) {
         if (playerState.value == STATE_DEFAULT) {
@@ -48,7 +75,7 @@ class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) 
             while (audioPlayerInteractor.isPlaying()) {
                 delay(DELAY)
                 val time = DateTimeUtil.simpleFormatTrack(audioPlayerInteractor.getPlaybackPosition().toLong())
-                _track.postValue(_track.value?.copy(currentPosition = time))
+                _trackInfo.postValue(_trackInfo.value?.copy(currentPosition = time))
             }
         }
     }
@@ -72,7 +99,7 @@ class PlayerViewModel(private val audioPlayerInteractor: AudioPlayerInteractor) 
     }
 
     private fun resetTrackTime() {
-        _track.postValue(_track.value?.copy(currentPosition = "00:00"))
+        _trackInfo.postValue(_trackInfo.value?.copy(currentPosition = "00:00"))
     }
 
     private fun stopProgressUpdates() {

@@ -31,6 +31,13 @@ class SearchViewModel(
     private val _hideKeyboardEvent = MutableLiveData<Unit>()
     val hideKeyboardEvent: LiveData<Unit> get() = _hideKeyboardEvent
 
+    init {
+        viewModelScope.launch {
+            val searchHistory = searchHistoryInteractor.getSearchHistory()
+            _state.postValue(SearchState.HistoryList(searchHistory))
+        }
+    }
+
     fun search(newSearchText: String) {
         if (newSearchText.isNotEmpty()) {
             renderState(SearchState.Loading)
@@ -68,16 +75,6 @@ class SearchViewModel(
 
     fun saveTrackInHistory(track: Track) {
         searchHistoryInteractor.saveTrackInHistory(track)
-    }
-
-    fun isNotEmptySearchHistory(): Boolean {
-        val searchHistory = searchHistoryInteractor.getSearchHistory()
-        return if (searchHistory.isNotEmpty()) {
-            _state.postValue(SearchState.HistoryList(searchHistory))
-            true
-        } else {
-            false
-        }
     }
 
     fun clearHistory() {
