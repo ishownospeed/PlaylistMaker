@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flow
 class TracksRepositoryImpl(
     private val networkClient: NetworkClient,
     private val appDatabase: AppDatabase
-    ) : TracksRepository {
+) : TracksRepository {
 
     override fun searchTracks(text: String): Flow<Resource<List<Track>>> = flow {
         val response: Response = networkClient.doRequest(TracksSearchRequest(text))

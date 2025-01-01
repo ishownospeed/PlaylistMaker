@@ -68,7 +68,6 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
         binding.buttonFavorite.setOnClickListener {
             track?.let {
                 viewModel.onFavoriteClicked(it)
-//                setResult(Activity.RESULT_OK)
             }
         }
 
@@ -98,7 +97,7 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
         binding.genreName.text = track.primaryGenreName
         binding.countryName.text = track.country
         binding.progressTime.text = track.trackTimeMillis
-        updateLikeButton(track.isFavorite)
+        viewModel.checkTrackIsFavorite(track.trackId)
     }
 
     private fun playbackControl() {

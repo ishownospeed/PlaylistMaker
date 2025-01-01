@@ -13,6 +13,9 @@ import com.practicum.playlistmaker.main.ui.base.BaseFragment
 import com.practicum.playlistmaker.player.ui.PlayerFragment
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.search.ui.TrackAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -23,6 +26,7 @@ class FavoriteTracksFragment : BaseFragment<FragmentFavoriteTracksBinding>() {
 
     private lateinit var adapter: TrackAdapter
     private var isClickAllowed = true
+    private var debounceJob: Job? = null
 
     override fun createBinding(
         inflater: LayoutInflater,
@@ -39,16 +43,12 @@ class FavoriteTracksFragment : BaseFragment<FragmentFavoriteTracksBinding>() {
         }
         binding.favoriteList.adapter = adapter
 
-        viewModel.fillData()
-
-        viewModel.observeState().observe(viewLifecycleOwner) {
-            render(it)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.observeState().collect {
+                render(it)
+            }
         }
-    }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.fillData()
     }
 
     private fun movePlayerFragment(track: Track) {
@@ -64,7 +64,8 @@ class FavoriteTracksFragment : BaseFragment<FragmentFavoriteTracksBinding>() {
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
-            viewLifecycleOwner.lifecycleScope.launch {
+            debounceJob?.cancel()
+            debounceJob = CoroutineScope(Dispatchers.Main).launch {
                 delay(CLICK_DEBOUNCE_DELAY)
                 isClickAllowed = true
             }

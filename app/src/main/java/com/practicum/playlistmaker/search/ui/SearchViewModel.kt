@@ -64,12 +64,15 @@ class SearchViewModel(
     fun changeInputEditTextState(hasFocus: Boolean, input: String) {
         val searchHistory = searchHistoryInteractor.getSearchHistory()
         _isClearIconVisibile.postValue(input.isNotEmpty())
-        if (hasFocus && input.isEmpty() && searchHistory.isNotEmpty()) {
-            _state.postValue(SearchState.HistoryList(searchHistory))
-        } else if (tracks.isNotEmpty() && latestSearchText == input) {
-            _state.postValue(SearchState.SearchList(tracks))
-        } else {
-            searchDebounce(input)
+
+        when {
+            input.isEmpty() && searchHistory.isNotEmpty() -> {
+                _state.postValue(SearchState.HistoryList(searchHistory))
+            }
+            tracks.isNotEmpty() && latestSearchText == input -> {
+                _state.postValue(SearchState.SearchList(tracks))
+            }
+            else -> searchDebounce(input)
         }
     }
 

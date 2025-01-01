@@ -36,7 +36,7 @@ val interactorModule = module {
         AudioPlayerInteractorImpl(get())
     }
 
-    single<FavoriteTrackInteractor> {
+    factory<FavoriteTrackInteractor> {
         FavoriteTrackInteractorImpl(get())
     }
 }
