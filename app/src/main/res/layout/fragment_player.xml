@@ -138,7 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/margin_8dp"
                 android:background="?attr/colorOnPrimary"
-                android:src="@drawable/ic_button_favorite"
+                android:src="@drawable/ic_button_not_favorite"
                 app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
                 app:layout_constraintEnd_toEndOf="@id/rightBorder"
                 app:layout_constraintTop_toTopOf="@id/buttonPlay" />

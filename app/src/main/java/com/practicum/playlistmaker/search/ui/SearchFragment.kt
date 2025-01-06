@@ -9,13 +9,15 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.main.ui.base.BaseFragment
 import com.practicum.playlistmaker.player.ui.PlayerFragment
 import com.practicum.playlistmaker.search.domain.models.Track
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -25,6 +27,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     private var inputValue: String = ""
 
     private var isClickAllowed = true
+    private var debounceJob: Job? = null
 
     private val viewModel by viewModel<SearchViewModel>()
 
@@ -52,9 +55,9 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             hideKeyboard()
         }
 
-        binding.containerHistory.isVisible = viewModel.isNotEmptySearchHistory()
         binding.buttonClearHistory.setOnClickListener {
             viewModel.clearHistory()
+            historyAdapter.clearTracks()
         }
 
         binding.inputEditText.setOnFocusChangeListener { _, hasFocus ->
@@ -92,11 +95,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             viewModel.saveTrackInHistory(track)
             movePlayerFragment(track)
         }
+        binding.listTracks.adapter = searchAdapter
 
         historyAdapter = TrackAdapter { track ->
             viewModel.saveTrackInHistory(track)
             movePlayerFragment(track)
         }
+        binding.listTracksHistory.adapter = historyAdapter
 
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
@@ -109,7 +114,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
     private fun clearListOnClick() {
         searchAdapter.clearTracks()
-        binding.containerHistory.isVisible = viewModel.isNotEmptySearchHistory()
+        binding.containerHistory.isVisible = historyAdapter.itemCount > 0
         binding.placeholderNothingFound.isVisible = false
         binding.placeholderUploadFailed.isVisible = false
         binding.buttonUpdate.isVisible = false
@@ -125,7 +130,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     }
 
     private fun showTracks(tracks: List<Track>) {
-        binding.listTracks.adapter = searchAdapter
         searchAdapter.updateTracks(tracks)
         binding.listTracks.isVisible = true
         binding.progressStatus.isVisible = false
@@ -136,7 +140,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     }
 
     private fun showHistory(tracks: List<Track>) {
-        binding.listTracksHistory.adapter = historyAdapter
         historyAdapter.updateTracks(tracks)
         binding.containerHistory.isVisible = tracks.isNotEmpty()
         binding.listTracks.isVisible = false
@@ -193,7 +196,8 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         val current = isClickAllowed
         if (isClickAllowed) {
             isClickAllowed = false
-            viewLifecycleOwner.lifecycleScope.launch {
+            debounceJob?.cancel()
+            debounceJob = CoroutineScope(Dispatchers.Main).launch {
                 delay(CLICK_DEBOUNCE_DELAY)
                 isClickAllowed = true
             }

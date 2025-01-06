@@ -31,6 +31,13 @@ class SearchViewModel(
     private val _hideKeyboardEvent = MutableLiveData<Unit>()
     val hideKeyboardEvent: LiveData<Unit> get() = _hideKeyboardEvent
 
+    init {
+        viewModelScope.launch {
+            val searchHistory = searchHistoryInteractor.getSearchHistory()
+            _state.postValue(SearchState.HistoryList(searchHistory))
+        }
+    }
+
     fun search(newSearchText: String) {
         if (newSearchText.isNotEmpty()) {
             renderState(SearchState.Loading)
@@ -57,27 +64,20 @@ class SearchViewModel(
     fun changeInputEditTextState(hasFocus: Boolean, input: String) {
         val searchHistory = searchHistoryInteractor.getSearchHistory()
         _isClearIconVisibile.postValue(input.isNotEmpty())
-        if (hasFocus && input.isEmpty() && searchHistory.isNotEmpty()) {
-            _state.postValue(SearchState.HistoryList(searchHistory))
-        } else if (tracks.isNotEmpty() && latestSearchText == input) {
-            _state.postValue(SearchState.SearchList(tracks))
-        } else {
-            searchDebounce(input)
+
+        when {
+            input.isEmpty() && searchHistory.isNotEmpty() -> {
+                _state.postValue(SearchState.HistoryList(searchHistory))
+            }
+            tracks.isNotEmpty() && latestSearchText == input -> {
+                _state.postValue(SearchState.SearchList(tracks))
+            }
+            else -> searchDebounce(input)
         }
     }
 
     fun saveTrackInHistory(track: Track) {
         searchHistoryInteractor.saveTrackInHistory(track)
-    }
-
-    fun isNotEmptySearchHistory(): Boolean {
-        val searchHistory = searchHistoryInteractor.getSearchHistory()
-        return if (searchHistory.isNotEmpty()) {
-            _state.postValue(SearchState.HistoryList(searchHistory))
-            true
-        } else {
-            false
-        }
     }
 
     fun clearHistory() {

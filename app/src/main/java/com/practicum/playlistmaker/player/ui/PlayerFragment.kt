@@ -41,14 +41,14 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
 
         if (track != null) {
             initTrack(track)
-            viewModel.preparePlayer(track.previewUrl)
+            track.previewUrl?.let { viewModel.preparePlayer(it) }
         }
 
         binding.buttonPlay.setOnClickListener {
             playbackControl()
         }
 
-        viewModel.track.observe(viewLifecycleOwner) {
+        viewModel.trackInfo.observe(viewLifecycleOwner) {
             binding.progressTime.text = it?.currentPosition
         }
 
@@ -63,6 +63,16 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
                     binding.buttonPlay.setImageResource(R.drawable.ic_button_play)
                 }
             }
+        }
+
+        binding.buttonFavorite.setOnClickListener {
+            track?.let {
+                viewModel.onFavoriteClicked(it)
+            }
+        }
+
+        viewModel.isFavorite.observe(viewLifecycleOwner){ isFavorite ->
+            updateLikeButton(isFavorite)
         }
     }
 
@@ -82,11 +92,12 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
         binding.trackNameAudioPlayer.text = track.trackName
         binding.artistAudioPlayer.text = track.artistName
         binding.trackTime.text = track.trackTimeMillis
-        binding.albumName.text = track.collectionName.ifEmpty { "" }
+        binding.albumName.text = track.collectionName?.ifEmpty { "" } ?: ""
         binding.yearName.text = track.releaseDate.substring(0, 4)
         binding.genreName.text = track.primaryGenreName
         binding.countryName.text = track.country
         binding.progressTime.text = track.trackTimeMillis
+        viewModel.checkTrackIsFavorite(track.trackId)
     }
 
     private fun playbackControl() {
@@ -95,6 +106,11 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
             PlayerViewModel.STATE_PREPARED, PlayerViewModel.STATE_PAUSED -> viewModel.startPlayer()
             PlayerViewModel.STATE_COMPLETED -> viewModel.startPlayer()
         }
+    }
+
+    private fun updateLikeButton(isFavorite: Boolean) {
+        val favorite = if (isFavorite) R.drawable.ic_button_favorite else R.drawable.ic_button_not_favorite
+        binding.buttonFavorite.setImageResource(favorite)
     }
 
 }
