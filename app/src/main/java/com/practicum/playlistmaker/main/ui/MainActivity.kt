@@ -2,6 +2,7 @@ package com.practicum.playlistmaker.main.ui
 
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -24,6 +25,10 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
+                R.id.newPlaylistFragment -> {
+                    binding.bottomNavigationView.visibility = View.GONE
+                    window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+                }
                 R.id.playerFragment -> {
                     binding.bottomNavigationView.visibility = View.GONE
                 }

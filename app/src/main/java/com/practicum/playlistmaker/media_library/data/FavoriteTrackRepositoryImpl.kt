@@ -27,7 +27,7 @@ class FavoriteTrackRepositoryImpl(
         return (tracks.map { track -> track.map { mapping.map(it) } })
     }
 
-    override suspend fun getFavoriteIdList(): List<Int> {
+    override suspend fun getFavoriteIdList(): List<Long> {
         return appDatabase.favoriteTracksDao().getFavoriteIdList()
     }
 }

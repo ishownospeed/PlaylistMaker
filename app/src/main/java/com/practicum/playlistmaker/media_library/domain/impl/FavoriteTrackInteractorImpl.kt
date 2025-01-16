@@ -21,7 +21,7 @@ class FavoriteTrackInteractorImpl(
         return favoriteTrackRepository.getFavoriteTracks()
     }
 
-    override suspend fun getFavoriteIdList(): List<Int> {
+    override suspend fun getFavoriteIdList(): List<Long> {
         return favoriteTrackRepository.getFavoriteIdList()
     }
 }
