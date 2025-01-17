@@ -25,6 +25,7 @@ class PlaylistRepositoryImpl(
 
     override suspend fun addTrackToPlaylist(playlist: Playlist, track: Track) {
         appDatabase.playlistDao().insertPlaylist(playlistMapping.map(playlist))
+        appDatabase.playlistDao().insertTrack(playlistMapping.map(track))
     }
 
 }

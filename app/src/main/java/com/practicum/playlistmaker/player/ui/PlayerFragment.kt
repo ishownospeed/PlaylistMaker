@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -26,6 +27,7 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
     private val viewModel by viewModel<PlayerViewModel>()
 
     private var playlistAdapter: BottomSheetPlayerAdapter? = null
+    private var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>? = null
 
     companion object {
         private const val TRACK = "track"
@@ -44,7 +46,7 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bottomSheetBehavior = BottomSheetBehavior.from(binding.standardBottomSheet).apply {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.standardBottomSheet).apply {
             state = BottomSheetBehavior.STATE_HIDDEN
         }
 
@@ -59,7 +61,6 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
 
         playlistAdapter = BottomSheetPlayerAdapter { playlist ->
             track?.let { viewModel.addTrackToPlaylist(playlist, it) }
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         }
         binding.bottomSheetPlaylists.adapter = playlistAdapter
 
@@ -101,10 +102,10 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
         }
 
         binding.buttonAddPlaylist.setOnClickListener {
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
 
-        bottomSheetBehavior.addBottomSheetCallback(object :
+        bottomSheetBehavior?.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
@@ -118,9 +119,7 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
                     else -> binding.overlay.isVisible = true
                 }
             }
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                binding.overlay.alpha = (slideOffset + 1f) / 2f
-            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
 
         binding.buttonNewPlaylist.setOnClickListener {
@@ -140,6 +139,7 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
                 ).show()
             }
             is ListPlaylistState.SuccessAdd -> {
+                bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
                 Toast.makeText(
                     context,
                     "Добавлено в плейлист ${state.playlists.name}",
@@ -150,9 +150,9 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
         }
     }
 
-    private fun showEmpty() {
-        binding.placeholderNonePlaylist.isVisible = true
-        binding.bottomSheetPlaylists.isVisible = false
+    private fun showEmpty() = with(binding) {
+        placeholderNonePlaylist.isVisible = true
+        bottomSheetPlaylists.isVisible = false
     }
 
     private fun content(playlists: List<Playlist>) {

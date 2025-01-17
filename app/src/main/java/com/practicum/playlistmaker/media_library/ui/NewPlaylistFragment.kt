@@ -5,8 +5,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +13,7 @@ import androidx.activity.addCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
+import androidx.core.widget.doOnTextChanged
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -66,13 +65,9 @@ class NewPlaylistFragment : BaseFragment<FragmentNewPlaylistBinding>() {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
-        binding.textInputEditTextName.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                binding.buttonCreate.isEnabled = s?.isNotEmpty() ?: false
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        })
+        binding.textInputEditTextName.doOnTextChanged { text, _, _, _ ->
+            binding.buttonCreate.isEnabled = text?.isNotEmpty() ?: false
+        }
 
         binding.buttonCreate.setOnClickListener {
             viewModel.addNewPlaylist(
@@ -89,7 +84,7 @@ class NewPlaylistFragment : BaseFragment<FragmentNewPlaylistBinding>() {
 
     private fun checkFields() {
         if (imageUri != null
-            && (binding.textInputEditTextName.text.toString().isNotBlank()
+            || (binding.textInputEditTextName.text.toString().isNotBlank()
                     || binding.textInputEditTextDescription.text.toString().isNotBlank())
         ) showDialog()
         else findNavController().navigateUp()

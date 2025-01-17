@@ -37,7 +37,7 @@ class PlayerViewModel(
     private val stateLiveData = MutableStateFlow<ListPlaylistState>(ListPlaylistState.Empty)
     fun observeState(): StateFlow<ListPlaylistState> = stateLiveData
 
-    init {
+    private fun getPlaylists() {
         viewModelScope.launch {
             playlistInteractor
                 .getListPlaylists()
@@ -51,10 +51,15 @@ class PlayerViewModel(
         }
     }
 
+    init {
+        getPlaylists()
+    }
+
     fun addTrackToPlaylist(playlist: Playlist, track: Track) {
         viewModelScope.launch {
             if (playlist.listIdsTracks.contains(track.trackId)) {
                 stateLiveData.value = ListPlaylistState.Duplicate(playlist)
+                getPlaylists()
             } else {
                 val updatedPlaylist = playlist.copy(
                     listIdsTracks = playlist.listIdsTracks + listOf(track.trackId),

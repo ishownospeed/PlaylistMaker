@@ -42,7 +42,7 @@ val repositoryModule = module {
         FavoriteTrackRepositoryImpl(get(), get())
     }
 
-    factory<PlaylistRepository> {
+    single<PlaylistRepository> {
         PlaylistRepositoryImpl(get(), get())
     }
 
