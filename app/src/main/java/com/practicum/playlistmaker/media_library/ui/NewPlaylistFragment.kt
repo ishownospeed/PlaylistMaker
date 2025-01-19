@@ -1,10 +1,7 @@
 package com.practicum.playlistmaker.media_library.ui
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +9,6 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toUri
 import androidx.core.widget.doOnTextChanged
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -24,8 +20,6 @@ import com.practicum.playlistmaker.databinding.FragmentNewPlaylistBinding
 import com.practicum.playlistmaker.main.ui.base.BaseFragment
 import com.practicum.playlistmaker.media_library.domain.models.Playlist
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.io.File
-import java.io.FileOutputStream
 
 class NewPlaylistFragment : BaseFragment<FragmentNewPlaylistBinding>() {
 
@@ -105,20 +99,10 @@ class NewPlaylistFragment : BaseFragment<FragmentNewPlaylistBinding>() {
     }
 
     private fun saveImageToPrivateStorage(uri: Uri) {
-        val filePath =
-            File(requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "myalbum")
-        if (!filePath.exists()) {
-            filePath.mkdirs()
+        viewModel.saveImage(uri) {
+            imageUri = it
+            setImageIntoView(it)
         }
-        val file = File(filePath, uri.toString().substringAfterLast("/"))
-        val inputStream = requireActivity().contentResolver.openInputStream(uri)
-        val outputStream = FileOutputStream(file)
-        BitmapFactory
-            .decodeStream(inputStream)
-            .compress(Bitmap.CompressFormat.JPEG, 30, outputStream)
-
-        imageUri = file.toUri()
-        setImageIntoView(file.toUri())
     }
 
     private fun setImageIntoView(uri: Uri) {
