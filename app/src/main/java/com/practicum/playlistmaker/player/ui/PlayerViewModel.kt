@@ -4,18 +4,24 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.playlistmaker.main.ui.base.SingleLiveEvent
 import com.practicum.playlistmaker.media_library.domain.api.FavoriteTrackInteractor
+import com.practicum.playlistmaker.media_library.domain.api.PlaylistInteractor
+import com.practicum.playlistmaker.media_library.domain.models.Playlist
 import com.practicum.playlistmaker.player.domain.api.AudioPlayerInteractor
 import com.practicum.playlistmaker.player.domain.models.TrackInfo
 import com.practicum.playlistmaker.search.domain.models.Track
 import com.practicum.playlistmaker.utils.DateTimeUtil
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class PlayerViewModel(
     private val audioPlayerInteractor: AudioPlayerInteractor,
-    private val favoriteTrackInteractor: FavoriteTrackInteractor
+    private val favoriteTrackInteractor: FavoriteTrackInteractor,
+    private val playlistInteractor: PlaylistInteractor
 ) : ViewModel() {
 
     private var timerJob: Job? = null
@@ -29,7 +35,38 @@ class PlayerViewModel(
     private val _isFavorite = MutableLiveData<Boolean>()
     val isFavorite: LiveData<Boolean> get() = _isFavorite
 
-    fun checkTrackIsFavorite(trackId: Int) {
+    private val stateLiveData = MutableStateFlow<ListPlaylistState>(ListPlaylistState.Empty)
+    fun observeState(): StateFlow<ListPlaylistState> = stateLiveData
+
+    private val _trackResult = SingleLiveEvent<Result>()
+    fun trackResult(): LiveData<Result> = _trackResult
+
+    init {
+        viewModelScope.launch {
+            playlistInteractor
+                .getListPlaylists()
+                .collect { playlists ->
+                    if (playlists.isEmpty()) {
+                        stateLiveData.value = ListPlaylistState.Empty
+                    } else {
+                        stateLiveData.value = ListPlaylistState.Content(playlists)
+                    }
+                }
+        }
+    }
+
+    fun addTrackToPlaylist(playlist: Playlist, track: Track) {
+        viewModelScope.launch {
+            if (playlist.listIdsTracks.contains(track.trackId)) {
+                _trackResult.postValue(Result.Duplicate(playlist))
+            } else {
+                playlistInteractor.addTrackToPlaylist(playlist, track)
+                _trackResult.postValue(Result.SuccessAdd(playlist))
+            }
+        }
+    }
+
+    fun checkTrackIsFavorite(trackId: Long) {
         viewModelScope.launch {
             val isFavorite = trackId in favoriteTrackInteractor.getFavoriteIdList()
             _isFavorite.postValue(isFavorite)
@@ -42,7 +79,7 @@ class PlayerViewModel(
                 favoriteTrackInteractor.removeTrackFromFavorites(track)
                 _isFavorite.postValue(false)
             } else {
-                favoriteTrackInteractor.addTrackToFavorites(track.apply { this.isFavorite= true })
+                favoriteTrackInteractor.addTrackToFavorites(track.apply { this.isFavorite = true })
                 _isFavorite.postValue(true)
             }
         }
@@ -104,6 +141,16 @@ class PlayerViewModel(
 
     private fun stopProgressUpdates() {
         timerJob?.cancel()
+    }
+
+    sealed interface Result {
+        data class Duplicate(val playlists: Playlist) : Result
+        data class SuccessAdd(val playlists: Playlist) : Result
+    }
+
+    sealed interface ListPlaylistState {
+        data object Empty : ListPlaylistState
+        data class Content(val playlists: List<Playlist>) : ListPlaylistState
     }
 
     companion object {

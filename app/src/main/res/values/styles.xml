@@ -94,4 +94,35 @@
         <item name="android:layout_marginBottom">@dimen/margin_16dp</item>
     </style>
 
+    <style name="TextInputLayoutOutlineBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">1dp</item>
+        <item name="android:textColorHint">?attr/colorOnSecondary</item>
+        <item name="android:textFontWeight">400</item>
+        <item name="android:textSize">12sp</item>
+        <item name="hintTextColor">@color/blue</item>
+        <item name="fontFamily">@font/ys_display_regular</item>
+    </style>
+
+    <style name="AlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="buttonBarNeutralButtonStyle">@style/NeutralButtonStyle</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+
+    <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+
+    <style name="NeutralButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+
 </resources>

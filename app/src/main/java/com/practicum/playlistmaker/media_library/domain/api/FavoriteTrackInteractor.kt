@@ -11,5 +11,5 @@ interface FavoriteTrackInteractor {
 
     suspend fun getFavoriteTracks(): Flow<List<Track>>
 
-    suspend fun getFavoriteIdList(): List<Int>
+    suspend fun getFavoriteIdList(): List<Long>
 }
