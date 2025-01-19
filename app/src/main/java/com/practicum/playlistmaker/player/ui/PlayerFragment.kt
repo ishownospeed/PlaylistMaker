@@ -18,6 +18,7 @@ import com.practicum.playlistmaker.databinding.FragmentPlayerBinding
 import com.practicum.playlistmaker.main.ui.base.BaseFragment
 import com.practicum.playlistmaker.media_library.domain.models.Playlist
 import com.practicum.playlistmaker.player.ui.PlayerViewModel.ListPlaylistState
+import com.practicum.playlistmaker.player.ui.PlayerViewModel.Result
 import com.practicum.playlistmaker.search.domain.models.Track
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -91,7 +92,7 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
             }
         }
 
-        viewModel.isFavorite.observe(viewLifecycleOwner){ isFavorite ->
+        viewModel.isFavorite.observe(viewLifecycleOwner) { isFavorite ->
             updateLikeButton(isFavorite)
         }
 
@@ -126,19 +127,22 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
             findNavController().navigate(R.id.action_playerFragment_to_newPlaylistFragment)
         }
 
+        viewModel.trackResult().observe(viewLifecycleOwner) {
+            resultAddedTrack(it)
+        }
+
     }
 
-    private fun render(state: ListPlaylistState) {
+    private fun resultAddedTrack(state: Result) {
         when (state) {
-            is ListPlaylistState.Empty -> showEmpty()
-            is ListPlaylistState.Duplicate -> {
+            is Result.Duplicate -> {
                 Toast.makeText(
                     context,
                     "Трек уже добавлен в плейлист ${state.playlists.name}",
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            is ListPlaylistState.SuccessAdd -> {
+            is Result.SuccessAdd -> {
                 bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
                 Toast.makeText(
                     context,
@@ -146,6 +150,12 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+        }
+    }
+
+    private fun render(state: ListPlaylistState) {
+        when (state) {
+            is ListPlaylistState.Empty -> showEmpty()
             is ListPlaylistState.Content -> content(state.playlists)
         }
     }

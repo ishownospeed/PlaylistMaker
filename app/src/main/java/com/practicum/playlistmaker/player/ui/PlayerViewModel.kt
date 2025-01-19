@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.practicum.playlistmaker.main.ui.base.SingleLiveEvent
 import com.practicum.playlistmaker.media_library.domain.api.FavoriteTrackInteractor
 import com.practicum.playlistmaker.media_library.domain.api.PlaylistInteractor
 import com.practicum.playlistmaker.media_library.domain.models.Playlist
@@ -37,7 +38,10 @@ class PlayerViewModel(
     private val stateLiveData = MutableStateFlow<ListPlaylistState>(ListPlaylistState.Empty)
     fun observeState(): StateFlow<ListPlaylistState> = stateLiveData
 
-    private fun getPlaylists() {
+    private val _trackResult = SingleLiveEvent<Result>()
+    fun trackResult(): LiveData<Result> = _trackResult
+
+    init {
         viewModelScope.launch {
             playlistInteractor
                 .getListPlaylists()
@@ -51,22 +55,13 @@ class PlayerViewModel(
         }
     }
 
-    init {
-        getPlaylists()
-    }
-
     fun addTrackToPlaylist(playlist: Playlist, track: Track) {
         viewModelScope.launch {
             if (playlist.listIdsTracks.contains(track.trackId)) {
-                stateLiveData.value = ListPlaylistState.Duplicate(playlist)
-                getPlaylists()
+                _trackResult.postValue(Result.Duplicate(playlist))
             } else {
-                val updatedPlaylist = playlist.copy(
-                    listIdsTracks = playlist.listIdsTracks + listOf(track.trackId),
-                    countTracks = playlist.listIdsTracks.size + 1
-                )
-                playlistInteractor.addTrackToPlaylist(updatedPlaylist, track)
-                stateLiveData.value = ListPlaylistState.SuccessAdd(playlist)
+                playlistInteractor.addTrackToPlaylist(playlist, track)
+                _trackResult.postValue(Result.SuccessAdd(playlist))
             }
         }
     }
@@ -84,7 +79,7 @@ class PlayerViewModel(
                 favoriteTrackInteractor.removeTrackFromFavorites(track)
                 _isFavorite.postValue(false)
             } else {
-                favoriteTrackInteractor.addTrackToFavorites(track.apply { this.isFavorite= true })
+                favoriteTrackInteractor.addTrackToFavorites(track.apply { this.isFavorite = true })
                 _isFavorite.postValue(true)
             }
         }
@@ -148,10 +143,13 @@ class PlayerViewModel(
         timerJob?.cancel()
     }
 
+    sealed interface Result {
+        data class Duplicate(val playlists: Playlist) : Result
+        data class SuccessAdd(val playlists: Playlist) : Result
+    }
+
     sealed interface ListPlaylistState {
         data object Empty : ListPlaylistState
-        data class Duplicate(val playlists: Playlist) : ListPlaylistState
-        data class SuccessAdd(val playlists: Playlist) : ListPlaylistState
         data class Content(val playlists: List<Playlist>) : ListPlaylistState
     }
 
