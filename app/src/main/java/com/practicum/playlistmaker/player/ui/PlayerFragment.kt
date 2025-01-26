@@ -20,6 +20,7 @@ import com.practicum.playlistmaker.media_library.domain.models.Playlist
 import com.practicum.playlistmaker.player.ui.PlayerViewModel.ListPlaylistState
 import com.practicum.playlistmaker.player.ui.PlayerViewModel.Result
 import com.practicum.playlistmaker.search.domain.models.Track
+import com.practicum.playlistmaker.utils.DateTimeUtil
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -186,12 +187,12 @@ class PlayerFragment : BaseFragment<FragmentPlayerBinding>() {
 
         binding.trackNameAudioPlayer.text = track.trackName
         binding.artistAudioPlayer.text = track.artistName
-        binding.trackTime.text = track.trackTimeMillis
+        binding.trackTime.text = DateTimeUtil.simpleFormatTrack(track.trackTimeMillis)
         binding.albumName.text = track.collectionName?.ifEmpty { "" } ?: ""
         binding.yearName.text = track.releaseDate.substring(0, 4)
         binding.genreName.text = track.primaryGenreName
         binding.countryName.text = track.country
-        binding.progressTime.text = track.trackTimeMillis
+        binding.progressTime.text = DateTimeUtil.simpleFormatTrack(track.trackTimeMillis)
         viewModel.checkTrackIsFavorite(track.trackId)
     }
 

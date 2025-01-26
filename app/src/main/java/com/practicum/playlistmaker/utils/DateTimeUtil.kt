@@ -9,4 +9,8 @@ object DateTimeUtil {
         return SimpleDateFormat("mm:ss", Locale.getDefault()).format(trackTimeMillis)
     }
 
+    fun durationSum(durationSum: Long): String {
+        return SimpleDateFormat("mm", Locale.getDefault()).format(durationSum)
+    }
+
 }

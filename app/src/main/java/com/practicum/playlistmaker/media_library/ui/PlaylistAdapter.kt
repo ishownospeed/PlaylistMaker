@@ -12,7 +12,9 @@ import com.practicum.playlistmaker.databinding.PlaylistItemBinding
 import com.practicum.playlistmaker.media_library.domain.models.Playlist
 import java.util.Locale
 
-class PlaylistAdapter : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
+class PlaylistAdapter(
+    private val onItemClickListener: OnItemClickListener
+) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     private var playlists: MutableList<Playlist> = mutableListOf()
 
@@ -67,7 +69,15 @@ class PlaylistAdapter : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>
             binding.namePlaylist.text = item.name
             binding.countTracks.text =
                 String.format(Locale.getDefault(), item.countTracks.toString() + " треков")
+
+            binding.root.setOnClickListener {
+                onItemClickListener.onItemClick(item)
+            }
         }
+    }
+
+    fun interface OnItemClickListener {
+        fun onItemClick(item: Playlist)
     }
 
 }

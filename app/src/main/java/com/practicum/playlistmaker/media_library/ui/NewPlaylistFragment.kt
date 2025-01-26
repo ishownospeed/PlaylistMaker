@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.core.widget.doOnTextChanged
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
@@ -26,7 +27,7 @@ class NewPlaylistFragment : BaseFragment<FragmentNewPlaylistBinding>() {
     private val viewModel by viewModel<NewPlaylistViewModel>()
 
     private var imageUri: Uri? = null
-
+    private var playlist: Playlist? = null
     private val pickMedia =
         registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
@@ -45,7 +46,26 @@ class NewPlaylistFragment : BaseFragment<FragmentNewPlaylistBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.buttonCreate.isEnabled = false
+
+        playlist = arguments?.getParcelable(PlaylistFragment.PLAYLIST)
+        if (playlist == null) {
+            binding.backArrowButton.text = getString(R.string.new_playlist)
+            binding.buttonCreate.text = getString(R.string.button_to_create)
+            binding.buttonCreate.isEnabled = false
+        } else {
+            binding.backArrowButton.text = getString(R.string.edit_playlist)
+            binding.buttonCreate.text = getString(R.string.save)
+            binding.textInputEditTextName.setText(playlist?.name)
+            binding.textInputEditTextDescription.setText(playlist?.description)
+            binding.buttonCreate.isEnabled = true
+
+            playlist?.imagePath?.let { uri ->
+                if (uri != "null") {
+                    imageUri = uri.toUri()
+                    setImageIntoView(uri.toUri())
+                }
+            }
+        }
 
         binding.backArrowButton.setOnClickListener {
             checkFields()
@@ -64,24 +84,45 @@ class NewPlaylistFragment : BaseFragment<FragmentNewPlaylistBinding>() {
         }
 
         binding.buttonCreate.setOnClickListener {
-            viewModel.addNewPlaylist(
-                Playlist(
-                    name = binding.textInputEditTextName.text.toString(),
-                    description = binding.textInputEditTextDescription.text.toString(),
-                    imagePath = imageUri.toString()
+            if (playlist == null) {
+                viewModel.addNewPlaylist(
+                    Playlist(
+                        name = binding.textInputEditTextName.text.toString(),
+                        description = binding.textInputEditTextDescription.text.toString(),
+                        imagePath = imageUri.toString()
+                    )
                 )
-            )
-            Toast.makeText(requireContext(),"Плейлист ${binding.textInputEditTextName.text} создан", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Плейлист ${binding.textInputEditTextName.text} создан",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                playlist?.let {
+                    val copyPlaylist = it.copy(
+                        name = binding.textInputEditTextName.text.toString(),
+                        description = binding.textInputEditTextDescription.text.toString(),
+                        imagePath = imageUri.toString(),
+                        listIdsTracks = it.listIdsTracks,
+                        countTracks = it.countTracks
+                    )
+                    viewModel.updatePlaylist(copyPlaylist)
+                }
+            }
             findNavController().navigateUp()
         }
     }
 
     private fun checkFields() {
-        if (imageUri != null
-            || (binding.textInputEditTextName.text.toString().isNotBlank()
-                    || binding.textInputEditTextDescription.text.toString().isNotBlank())
-        ) showDialog()
-        else findNavController().navigateUp()
+        if (playlist == null) {
+            if (imageUri != null
+                || (binding.textInputEditTextName.text.toString().isNotBlank()
+                        || binding.textInputEditTextDescription.text.toString().isNotBlank())
+            ) showDialog()
+            else findNavController().navigateUp()
+        } else {
+            findNavController().navigateUp()
+        }
     }
 
     private fun showDialog() {

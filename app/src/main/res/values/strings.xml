@@ -30,4 +30,10 @@
     <string name="none_playlist">Вы не создали\nни одного плейлиста</string>
     <string name="new_playlist">Новый плейлист</string>
     <string name="add_to_playlist">Добавить в плейлист</string>
+    <string name="share_playlist">Поделиться</string>
+    <string name="edit_information">Редактировать информацию</string>
+    <string name="delete_playlist">Удалить плейлист</string>
+    <string name="button_to_create">Создать</string>
+    <string name="edit_playlist">Редактировать</string>
+    <string name="save">Сохранить</string>
 </resources>

@@ -19,6 +19,12 @@ class NewPlaylistViewModel(
         }
     }
 
+    fun updatePlaylist(playlist: Playlist) {
+        viewModelScope.launch {
+            playlistInteractor.updatePlaylist(playlist)
+        }
+    }
+
     fun saveImage(uri: Uri, onSuccess: (Uri) -> Unit) {
         viewModelScope.launch {
             val savedUri = saveImageStorageInteractor.saveImageToPrivateStorage(uri)

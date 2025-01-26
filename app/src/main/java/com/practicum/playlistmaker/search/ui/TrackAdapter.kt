@@ -9,6 +9,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.TrackViewBinding
 import com.practicum.playlistmaker.search.domain.models.Track
+import com.practicum.playlistmaker.utils.DateTimeUtil
 
 class TrackAdapter(
     private val onItemClickListener: OnItemClickListener
@@ -56,8 +57,9 @@ class TrackAdapter(
         this.notifyDataSetChanged()
     }
 
-    fun interface OnItemClickListener {
+    interface OnItemClickListener {
         fun onItemClick(item: Track)
+        fun onItemLongClick(item: Track): Boolean
     }
 
     inner class TrackViewHolder(private val binding: TrackViewBinding) :
@@ -73,10 +75,13 @@ class TrackAdapter(
 
             binding.trackName.text = item.trackName
             binding.artistName.text = item.artistName
-            binding.trackTime.text = item.trackTimeMillis
+            binding.trackTime.text = DateTimeUtil.simpleFormatTrack(item.trackTimeMillis)
 
             binding.root.setOnClickListener {
                 onItemClickListener.onItemClick(item)
+            }
+            binding.root.setOnLongClickListener {
+                onItemClickListener.onItemLongClick(item)
             }
         }
     }
