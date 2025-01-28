@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
                     binding.bottomNavigationView.visibility = View.GONE
                     window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
                 }
-                R.id.playerFragment -> {
+                R.id.playerFragment, R.id.playlistFragment -> {
                     binding.bottomNavigationView.visibility = View.GONE
                 }
                 else -> {

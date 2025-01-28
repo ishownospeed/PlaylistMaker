@@ -48,4 +48,20 @@ class PlaylistMapping(private val gson: Gson) {
         )
     }
 
+    fun map(playlistTrackEntity: TrackInPlaylistEntity): Track {
+        return Track(
+            trackId = playlistTrackEntity.trackId,
+            trackName = playlistTrackEntity.trackName,
+            artistName = playlistTrackEntity.artistName,
+            trackTimeMillis = playlistTrackEntity.trackTimeMillis,
+            artworkUrl100 = playlistTrackEntity.artworkUrl100,
+            collectionName = playlistTrackEntity.collectionName,
+            releaseDate = playlistTrackEntity.releaseDate,
+            primaryGenreName = playlistTrackEntity.primaryGenreName,
+            country = playlistTrackEntity.country,
+            previewUrl = playlistTrackEntity.previewUrl,
+            isFavorite = playlistTrackEntity.isFavorite
+        )
+    }
+
 }

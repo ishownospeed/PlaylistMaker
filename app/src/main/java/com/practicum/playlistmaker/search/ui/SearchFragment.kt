@@ -91,16 +91,26 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             }
         }
 
-        searchAdapter = TrackAdapter { track ->
-            viewModel.saveTrackInHistory(track)
-            movePlayerFragment(track)
-        }
+        searchAdapter = TrackAdapter(object : TrackAdapter.OnItemClickListener {
+            override fun onItemClick(item: Track) {
+                viewModel.saveTrackInHistory(item)
+                movePlayerFragment(item)
+            }
+            override fun onItemLongClick(item: Track): Boolean {
+                return false
+            }
+        })
         binding.listTracks.adapter = searchAdapter
 
-        historyAdapter = TrackAdapter { track ->
-            viewModel.saveTrackInHistory(track)
-            movePlayerFragment(track)
-        }
+        historyAdapter = TrackAdapter(object : TrackAdapter.OnItemClickListener {
+            override fun onItemClick(item: Track) {
+                viewModel.saveTrackInHistory(item)
+                movePlayerFragment(item)
+            }
+            override fun onItemLongClick(item: Track): Boolean {
+                return false
+            }
+        })
         binding.listTracksHistory.adapter = historyAdapter
 
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {

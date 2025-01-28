@@ -8,7 +8,6 @@ import com.practicum.playlistmaker.search.data.network.NetworkClient
 import com.practicum.playlistmaker.search.domain.api.Resource
 import com.practicum.playlistmaker.search.domain.api.TracksRepository
 import com.practicum.playlistmaker.search.domain.models.Track
-import com.practicum.playlistmaker.utils.DateTimeUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -33,7 +32,7 @@ class TracksRepositoryImpl(
                         trackId = trackDto.trackId,
                         trackName = trackDto.trackName,
                         artistName = trackDto.artistName,
-                        trackTimeMillis = DateTimeUtil.simpleFormatTrack(trackDto.trackTimeMillis),
+                        trackTimeMillis = trackDto.trackTimeMillis,
                         artworkUrl100 = trackDto.artworkUrl100,
                         collectionName = trackDto.collectionName,
                         releaseDate = trackDto.releaseDate,

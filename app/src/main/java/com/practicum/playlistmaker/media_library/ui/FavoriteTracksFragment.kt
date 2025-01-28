@@ -38,9 +38,14 @@ class FavoriteTracksFragment : BaseFragment<FragmentFavoriteTracksBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = TrackAdapter { track ->
-            movePlayerFragment(track)
-        }
+        adapter = TrackAdapter(object : TrackAdapter.OnItemClickListener {
+            override fun onItemClick(item: Track) {
+                movePlayerFragment(item)
+            }
+            override fun onItemLongClick(item: Track): Boolean {
+                return false
+            }
+        })
         binding.favoriteList.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
